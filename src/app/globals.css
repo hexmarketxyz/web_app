@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Dark theme (default) */
+  :root {
+    /* Surface colors (RGB channels for Tailwind alpha support) */
+    --hex-dark: 15 23 42;
+    --hex-card: 30 41 59;
+    --hex-border: 51 65 85;
+
+    /* Text colors */
+    --hex-text-primary: 255 255 255;
+    --hex-text-secondary: 156 163 175;
+    --hex-text-tertiary: 107 114 128;
+
+    /* Overlay (for hover effects) */
+    --hex-overlay: 255 255 255;
+
+    /* Outcome tint backgrounds */
+    --hex-yes-bg: 20 83 45;
+    --hex-no-bg: 127 29 29;
+
+    /* Chart colors (non-alpha, used as literal values) */
+    --hex-chart-grid: rgba(255, 255, 255, 0.05);
+    --hex-chart-text: #9ca3af;
+
+    /* Logo colors */
+    --hex-logo-structure: #00E599;
+    --hex-logo-trend: #00E599;
+    --hex-logo-grid-opacity: 0.18;
+    --hex-wordmark-base: #ffffff;
+    --hex-wordmark-accent: #00E599;
+  }
+
+  /* Light theme */
+  [data-theme='light'] {
+    --hex-dark: 248 250 252;
+    --hex-card: 255 255 255;
+    --hex-border: 226 232 240;
+
+    --hex-text-primary: 15 23 42;
+    --hex-text-secondary: 100 116 139;
+    --hex-text-tertiary: 71 85 105;
+
+    --hex-overlay: 0 0 0;
+
+    --hex-yes-bg: 220 252 231;
+    --hex-no-bg: 254 226 226;
+
+    --hex-chart-grid: rgba(0, 0, 0, 0.06);
+    --hex-chart-text: #64748b;
+
+    --hex-logo-structure: #111111;
+    --hex-logo-trend: #00C07F;
+    --hex-logo-grid-opacity: 0.1;
+    --hex-wordmark-base: #111111;
+    --hex-wordmark-accent: #00C07F;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bottom-sheet slide-up animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
+}
