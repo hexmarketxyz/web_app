@@ -1,127 +1,127 @@
 # HexMarket Web App
 
-HexMarket 预测市场前端，基于 Next.js 构建，生产环境以静态导出（`output: 'export'`）方式部署。
+Frontend for the HexMarket prediction market, built with Next.js and deployed as a static export (`output: 'export'`).
 
-## 技术栈
+## Tech Stack
 
 - **Framework**: Next.js 15 + React 19
 - **Language**: TypeScript 5
 - **Styling**: Tailwind CSS 3
 - **State Management**: Zustand (theme, locale, orderbook)
-- **Data Fetching**: TanStack React Query + WebSocket (实时行情)
+- **Data Fetching**: TanStack React Query + WebSocket (real-time quotes)
 - **Charts**: Lightweight Charts (TradingView)
 - **Wallet**: Privy (authentication) + Solana Web3.js
-- **SDK**: `@hexmarket/sdk` (TypeScript SDK, workspace 依赖)
-- **I18n**: 自定义 i18n，支持 en / zh-CN / zh-TW / ja / ko / vi
+- **SDK**: `@hexmarket/sdk` (TypeScript SDK, workspace dependency)
+- **I18n**: Custom i18n supporting en / zh-CN / zh-TW / ja / ko / vi
 
-## 项目结构
+## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── [[...path]]/        # Catch-all SPA 路由
-│   │   ├── SpaApp.tsx      # 客户端路由分发
-│   │   ├── HomePage.tsx    # 首页（事件列表）
-│   │   ├── EventPage.tsx   # 事件详情（交易面板、订单簿、图表）
+│   ├── [[...path]]/        # Catch-all SPA route
+│   │   ├── SpaApp.tsx      # Client-side router
+│   │   ├── HomePage.tsx    # Home page (event list)
+│   │   ├── EventPage.tsx   # Event detail (trade panel, order book, chart)
 │   │   ├── CategoryPage.tsx
 │   │   └── MarketDetailPage.tsx
-│   ├── portfolio/          # 投资组合页面
-│   ├── layout.tsx          # 根布局
+│   ├── portfolio/          # Portfolio page
+│   ├── layout.tsx          # Root layout
 │   └── globals.css
 ├── components/
-│   ├── auth/               # 钱包连接
-│   ├── charts/             # 价格图表、迷你走势图
-│   ├── events/             # 事件相关组件（卡片、头部、交易面板、订单簿等）
-│   ├── layout/             # Header 导航
-│   ├── portfolio/          # 持仓、订单、历史表格
-│   ├── providers/          # React Context Providers（Auth, Theme, WebSocket, Query）
-│   ├── trading/            # 交易组件（下单面板、订单簿显示、最近成交）
-│   ├── ui/                 # 通用 UI 组件（Logo, Avatar, Toast, 语言选择器）
-│   └── vault/              # 金库面板
-├── hooks/                  # 自定义 Hooks
-│   ├── useEvents.ts        # 事件列表/详情查询
-│   ├── useOrderBook.ts     # 订单簿 WebSocket 订阅
-│   ├── usePlaceOrder.ts    # 下单（含签名）
+│   ├── auth/               # Wallet connection
+│   ├── charts/             # Price charts, sparklines
+│   ├── events/             # Event components (card, header, trade panel, order book, etc.)
+│   ├── layout/             # Header navigation
+│   ├── portfolio/          # Positions, orders, history tables
+│   ├── providers/          # React Context Providers (Auth, Theme, WebSocket, Query)
+│   ├── trading/            # Trading components (order panel, order book display, recent trades)
+│   ├── ui/                 # Common UI components (Logo, Avatar, Toast, language selector)
+│   └── vault/              # Vault panel
+├── hooks/                  # Custom hooks
+│   ├── useEvents.ts        # Event list/detail queries
+│   ├── useOrderBook.ts     # Order book WebSocket subscription
+│   ├── usePlaceOrder.ts    # Place order (with signature)
 │   ├── usePortfolioPositions.ts
-│   ├── usePriceHistory.ts  # 价格历史（图表数据）
-│   ├── useSpaNavigation.tsx # SPA 客户端路由
+│   ├── usePriceHistory.ts  # Price history (chart data)
+│   ├── useSpaNavigation.tsx # SPA client-side routing
 │   ├── useTranslation.ts   # i18n hook
-│   ├── useUnifiedWallet.ts # 统一钱包接口
+│   ├── useUnifiedWallet.ts # Unified wallet interface
 │   └── ...
-├── i18n/                   # 多语言翻译文件
+├── i18n/                   # Translation files
 │   ├── en.ts / zh-CN.ts / zh-TW.ts / ja.ts / ko.ts / vi.ts
-│   ├── config.ts           # 语言配置
-│   └── dynamic.ts          # 动态内容翻译（服务端返回的 translations）
-├── lib/                    # 工具函数
+│   ├── config.ts           # Locale configuration
+│   └── dynamic.ts          # Dynamic content translation (server-returned translations)
+├── lib/                    # Utility functions
 ├── stores/                 # Zustand stores
-│   ├── localeStore.ts      # 语言偏好
-│   ├── themeStore.ts       # 主题（light/dark/auto）
-│   └── orderBookStore.ts   # 订单簿状态
+│   ├── localeStore.ts      # Locale preference
+│   ├── themeStore.ts       # Theme (light/dark/auto)
+│   └── orderBookStore.ts   # Order book state
 ```
 
-## 路由
+## Routing
 
-采用 Next.js catch-all route `[[...path]]` + 客户端 SPA 路由：
+Uses Next.js catch-all route `[[...path]]` with client-side SPA routing:
 
-| 路径 | 页面 |
+| Path | Page |
 |------|------|
-| `/` | 首页（事件列表） |
-| `/events/:slug` | 事件详情 |
-| `/events/:slug/market/:marketId` | 市场详情 |
-| `/category/:slug` | 分类筛选 |
-| `/portfolio` | 投资组合（独立 Next.js 页面） |
+| `/` | Home (event list) |
+| `/events/:slug` | Event detail |
+| `/events/:slug/market/:marketId` | Market detail |
+| `/category/:slug` | Category filter |
+| `/portfolio` | Portfolio (standalone Next.js page) |
 
-## 环境变量
+## Environment Variables
 
-在项目根目录创建 `.env.local`：
+Create a `.env.local` file in the project root:
 
 ```env
 NEXT_PUBLIC_API_URL=https://api.hexmarket.xyz
 NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
 ```
 
-## 本地开发
+## Local Development
 
 ```bash
-# 在 monorepo 根目录
+# From the monorepo root
 pnpm install
-pnpm dev:web        # 启动 dev server (0.0.0.0:3000)
+pnpm dev:web        # Start dev server (0.0.0.0:3000)
 ```
 
-或在本项目目录下：
+Or from this project directory:
 
 ```bash
 pnpm install
 pnpm dev            # next dev -H 0.0.0.0
 ```
 
-## 构建 & 部署
+## Build & Deployment
 
-生产环境使用 Next.js 静态导出，输出到 `out/` 目录，由 Nginx 托管静态文件。
+Production uses Next.js static export, outputting to the `out/` directory and served by Nginx as static files.
 
 ```bash
-# 构建
-pnpm build          # next build → 输出 out/
+# Build
+pnpm build          # next build → outputs to out/
 
-# 部署（在 monorepo 中执行）
+# Deploy (run from monorepo root)
 deploy/scripts/deploy_web.sh
 ```
 
-部署脚本执行流程：
+Deployment script steps:
 1. `git submodule update --init --recursive`
 2. `pnpm install`
 3. `pnpm build:web`
-4. 将 `out/*` 复制到 `/var/www/hexmarket/web/`
+4. Copy `out/*` to `/var/www/hexmarket/web/`
 
-### Nginx 配置要点
+### Nginx Configuration Notes
 
-- 静态文件目录指向 `/var/www/hexmarket/web/`
-- 开启 `trailingSlash`（Next.js 配置已启用）
-- SPA fallback：所有未匹配路径返回 `index.html`
+- Document root points to `/var/www/hexmarket/web/`
+- `trailingSlash` is enabled in the Next.js config
+- SPA fallback: all unmatched paths should return `index.html`
 
-## 类型检查
+## Type Checking
 
 ```bash
 pnpm type-check     # tsc --noEmit
-pnpm lint           # 同上
+pnpm lint           # same as above
 ```
