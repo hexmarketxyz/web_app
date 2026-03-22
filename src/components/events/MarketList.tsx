@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSpaNavigate } from '@/hooks/useSpaNavigation';
 import type { Outcome, MarketDetail } from '@hexmarket/sdk';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
@@ -23,7 +23,7 @@ interface MarketListProps {
 
 export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug, onBuy, onSell }: MarketListProps) {
   const { t, locale } = useTranslation();
-  const router = useRouter();
+  const navigate = useSpaNavigate();
   const [expandedMarketId, setExpandedMarketId] = useState<string | null>(null);
   const { data: positions } = usePortfolioPositions();
   const { data: allOrders } = useAllOpenOrders();
@@ -52,7 +52,7 @@ export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug,
               onClick={() => {
                 // Mobile: navigate to market detail page
                 if (eventSlug && window.innerWidth < 1024) {
-                  router.push(`/events/${eventSlug}/market/${market.id}`);
+                  navigate(`/events/${eventSlug}/market/${market.id}`);
                   return;
                 }
                 // Desktop: expand/collapse inline

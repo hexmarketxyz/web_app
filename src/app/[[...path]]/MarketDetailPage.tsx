@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { useRouteParams } from '@/hooks/useRouteParams';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEvent } from '@/hooks/useEvents';
@@ -342,7 +342,6 @@ function MarketBadges({ outcomes }: { outcomes: Outcome[] }) {
 
 export default function MarketDetailPage() {
   const { slug, marketId } = useRouteParams();
-  const router = useRouter();
   const { data: event, isLoading } = useEvent(slug);
   const { t, locale } = useTranslation();
   const [selectedOutcomeId, setSelectedOutcomeId] = useState<string | undefined>();
@@ -396,7 +395,7 @@ export default function MarketDetailPage() {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => window.history.back()}
             className="p-2 -ml-2 text-theme-secondary hover:text-theme-primary transition"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
