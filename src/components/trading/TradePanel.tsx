@@ -8,7 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 type TradeSide = 'buy' | 'sell';
 
 export function TradePanel({ outcomeId }: { outcomeId: string }) {
-  const { connected, signMessage } = useUnifiedWallet();
+  const { connected, signMessage, login } = useUnifiedWallet();
   const { t } = useTranslation();
   const [side, setSide] = useState<TradeSide>('buy');
   const [price, setPrice] = useState('');
@@ -133,21 +133,29 @@ export function TradePanel({ outcomeId }: { outcomeId: string }) {
       )}
 
       {/* Submit */}
-      <button
-        type="submit"
-        disabled={!canSubmit}
-        className={`w-full py-3 rounded-lg font-semibold transition ${
-          canSubmit
-            ? 'bg-hex-blue hover:bg-blue-600 text-white'
-            : 'bg-gray-700 text-theme-tertiary cursor-not-allowed'
-        }`}
-      >
-        {!connected
-          ? t('auth.signIn')
-          : placeOrder.isPending
+      {!connected ? (
+        <button
+          type="button"
+          onClick={() => login?.()}
+          className="w-full py-3 rounded-lg font-semibold transition bg-hex-blue hover:bg-blue-600 text-white"
+        >
+          {t('auth.signIn')}
+        </button>
+      ) : (
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className={`w-full py-3 rounded-lg font-semibold transition ${
+            canSubmit
+              ? 'bg-hex-blue hover:bg-blue-600 text-white'
+              : 'bg-gray-700 text-theme-tertiary cursor-not-allowed'
+          }`}
+        >
+          {placeOrder.isPending
             ? t('trading.signing')
             : side === 'buy' ? t('trading.buy') : t('trading.sell')}
-      </button>
+        </button>
+      )}
     </form>
   );
 }

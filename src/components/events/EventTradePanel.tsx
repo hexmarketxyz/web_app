@@ -57,7 +57,7 @@ export function EventTradePanel({
   onSelectOutcome,
   sellRequest,
 }: EventTradePanelProps) {
-  const { connected, signMessage } = useUnifiedWallet();
+  const { connected, signMessage, login } = useUnifiedWallet();
   const placeOrder = usePlaceOrder();
   const { data: positions } = usePortfolioPositions();
   const { data: allOrders } = useAllOpenOrders();
@@ -426,23 +426,29 @@ export function EventTradePanel({
         )}
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className={`w-full py-3 rounded-lg font-semibold transition ${
-            canSubmit
-              ? side === 'buy'
-                ? 'bg-hex-blue hover:bg-blue-600 text-white'
-                : 'bg-hex-red hover:bg-red-600 text-white'
-              : 'bg-hex-dark text-theme-tertiary border border-hex-border cursor-not-allowed'
-          }`}
-        >
-          {!connected
-            ? t('auth.signIn')
-            : placeOrder.isPending
-              ? t('trading.signing')
-              : t('trading.trade')}
-        </button>
+        {!connected ? (
+          <button
+            type="button"
+            onClick={() => login?.()}
+            className="w-full py-3 rounded-lg font-semibold transition bg-hex-blue hover:bg-blue-600 text-white"
+          >
+            {t('auth.signIn')}
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={`w-full py-3 rounded-lg font-semibold transition ${
+              canSubmit
+                ? side === 'buy'
+                  ? 'bg-hex-blue hover:bg-blue-600 text-white'
+                  : 'bg-hex-red hover:bg-red-600 text-white'
+                : 'bg-hex-dark text-theme-tertiary border border-hex-border cursor-not-allowed'
+            }`}
+          >
+            {placeOrder.isPending ? t('trading.signing') : t('trading.trade')}
+          </button>
+        )}
       </form>
     </div>
   );
