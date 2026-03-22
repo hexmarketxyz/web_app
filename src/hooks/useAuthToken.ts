@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { buildAuthToken, parseAuthTokenTimestamp } from '@hexmarket/sdk';
 import { useUnifiedWallet } from './useUnifiedWallet';
 
-/** Token lifetime — must match server DEFAULT_TOKEN_EXPIRY_SECS (7 days). */
-const TOKEN_LIFETIME_SECS = 7 * 86400;
+/** Token lifetime — must match server DEFAULT_TOKEN_EXPIRY_SECS (30 days). */
+const TOKEN_LIFETIME_SECS = 30 * 86400;
 /** Refresh 1 hour before expiry. */
 const REFRESH_BUFFER_SECS = 3600;
 
