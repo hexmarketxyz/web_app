@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { buildApiKeyMessage, buildAuthToken, type ApiCredentials } from '@hexmarket/sdk';
+import { type ApiCredentials } from '@hexmarket/sdk';
 import { useUnifiedWallet } from './useUnifiedWallet';
+import { useAuth } from '@/components/providers/AuthTokenProvider';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 const STORAGE_PREFIX = 'hex_api_credentials_';
@@ -33,44 +34,28 @@ function saveToStorage(pubkey: string, creds: ApiCredentials): void {
   localStorage.setItem(getStorageKey(pubkey), JSON.stringify(creds));
 }
 
-function clearStorage(pubkey: string): void {
-  localStorage.removeItem(getStorageKey(pubkey));
-}
-
 export function useApiCredentials(): ApiCredentialsState {
-  const { publicKeyBase58, signMessage, connected } = useUnifiedWallet();
+  const { publicKeyBase58, connected } = useUnifiedWallet();
+  const { authToken } = useAuth();
   const [credentials, setCredentials] = useState<ApiCredentials | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const currentPubkeyRef = useRef<string | null>(null);
   const creatingRef = useRef(false);
 
   const createCredentials = useCallback(async () => {
-    if (!publicKeyBase58 || !signMessage || creatingRef.current) return;
+    if (!publicKeyBase58 || !authToken || creatingRef.current) return;
 
     creatingRef.current = true;
     setIsCreating(true);
     try {
-      // 1. Build L1 auth token for the /auth/api-key endpoint
-      const authToken = await buildAuthToken(publicKeyBase58, signMessage);
-
-      // 2. Sign the API key derivation message
-      const derivationMsg = buildApiKeyMessage(DEFAULT_NONCE);
-      const sigBytes = await signMessage(derivationMsg);
-      // Encode signature as base58
-      const { encode } = await import('bs58');
-      const derivationSig = encode(sigBytes);
-
-      // 3. Call POST /api/v1/auth/api-key
-      const res = await fetch(`${API_URL}/api/v1/auth/api-key`, {
+      // Use the ensure endpoint — only needs auth token, no extra signature
+      const res = await fetch(`${API_URL}/api/v1/auth/api-key/ensure`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({
-          nonce: DEFAULT_NONCE,
-          signature: derivationSig,
-        }),
+        body: JSON.stringify({ nonce: DEFAULT_NONCE }),
       });
 
       if (!res.ok) {
@@ -95,11 +80,11 @@ export function useApiCredentials(): ApiCredentialsState {
       setIsCreating(false);
       creatingRef.current = false;
     }
-  }, [publicKeyBase58, signMessage]);
+  }, [publicKeyBase58, authToken]);
 
   // Load from localStorage or create on wallet connect / change
   useEffect(() => {
-    if (!connected || !publicKeyBase58 || !signMessage) return;
+    if (!connected || !publicKeyBase58) return;
 
     // Already loaded for this wallet
     if (currentPubkeyRef.current === publicKeyBase58 && credentials) return;
@@ -112,9 +97,12 @@ export function useApiCredentials(): ApiCredentialsState {
       return;
     }
 
-    // Not in localStorage — create via API
+    // Wait for auth token to be ready before creating
+    if (!authToken) return;
+
+    // Not in localStorage — create via API (no extra signature needed)
     createCredentials();
-  }, [connected, publicKeyBase58, signMessage, credentials, createCredentials]);
+  }, [connected, publicKeyBase58, authToken, credentials, createCredentials]);
 
   // Clear on disconnect
   useEffect(() => {
