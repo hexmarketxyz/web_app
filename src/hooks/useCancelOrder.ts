@@ -24,6 +24,8 @@ export function useCancelOrder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allOpenOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['portfolioPositions'] });
+      queryClient.invalidateQueries({ queryKey: ['userTrades'] });
       queryClient.invalidateQueries({ queryKey: ['usdcBalance'] });
     },
   });

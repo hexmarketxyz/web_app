@@ -86,6 +86,9 @@ export function usePlaceOrder() {
     },
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ['openOrders', input.outcomeId] });
+      queryClient.invalidateQueries({ queryKey: ['allOpenOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['portfolioPositions'] });
+      queryClient.invalidateQueries({ queryKey: ['userTrades'] });
       queryClient.invalidateQueries({ queryKey: ['usdcBalance'] });
     },
   });
