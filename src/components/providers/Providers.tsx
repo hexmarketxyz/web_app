@@ -11,6 +11,7 @@ import { AuthTokenProvider } from './AuthTokenProvider';
 import { ApiCredentialsProvider } from './ApiCredentialsProvider';
 import { PrivyWalletProvider } from './PrivyWalletProvider';
 import { OkxWalletProvider } from './OkxWalletProvider';
+import { SessionKeyProvider } from './SessionKeyProvider';
 import { isOkxWalletBrowser } from '@/lib/okxDetect';
 
 const queryClient = new QueryClient({
@@ -71,15 +72,17 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <WebSocketProvider>
         <WalletStack>
-          <AuthTokenProvider>
-            <ApiCredentialsProvider>
-              <ThemeProvider>
-                <ToastProvider>
-                  {children}
-                </ToastProvider>
-              </ThemeProvider>
-            </ApiCredentialsProvider>
-          </AuthTokenProvider>
+          <SessionKeyProvider>
+            <AuthTokenProvider>
+              <ApiCredentialsProvider>
+                <ThemeProvider>
+                  <ToastProvider>
+                    {children}
+                  </ToastProvider>
+                </ThemeProvider>
+              </ApiCredentialsProvider>
+            </AuthTokenProvider>
+          </SessionKeyProvider>
         </WalletStack>
       </WebSocketProvider>
     </QueryClientProvider>

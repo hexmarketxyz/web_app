@@ -23,7 +23,8 @@
     "react-dom": "^19.0.0",
     "zustand": "^4.5.0",
     "lightweight-charts": "^4.2.0",
-    "bs58": "^5.0.0"
+    "bs58": "^5.0.0",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

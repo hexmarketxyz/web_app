@@ -2,6 +2,7 @@
 
 import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
 import { useApiCreds } from '@/components/providers/ApiCredentialsProvider';
+import { useSession } from '@/components/providers/SessionKeyProvider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   OrdersApi,
@@ -28,12 +29,19 @@ const ordersApi = new OrdersApi(API_URL);
 export function usePlaceOrder() {
   const { publicKeyBase58, signMessage } = useUnifiedWallet();
   const { credentials } = useApiCreds();
+  const { sessionPubkey, signWithSession } = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: PlaceOrderInput) => {
-      if (!publicKeyBase58 || !signMessage || !credentials) {
+      if (!publicKeyBase58 || !credentials) {
         throw new Error('Wallet not connected or API credentials not ready');
+      }
+
+      // Need either session key or wallet signMessage
+      const canUseSession = sessionPubkey && signWithSession;
+      if (!canUseSession && !signMessage) {
+        throw new Error('No signing method available');
       }
 
       const nonce = generateNonce();
@@ -49,12 +57,19 @@ export function usePlaceOrder() {
         nonce,
       };
 
-      // Sign order with wallet (required for on-chain settlement)
+      // Sign order: prefer session key (no popup), fall back to wallet
       const messageBytes = buildOrderMessage(unsignedParams);
-      const signatureBytes = await signMessage(messageBytes);
+      let signatureBytes: Uint8Array;
+
+      if (canUseSession) {
+        signatureBytes = await signWithSession!(messageBytes);
+      } else {
+        signatureBytes = await signMessage!(messageBytes);
+      }
+
       const signature = bs58.encode(signatureBytes);
 
-      // Build L2 auth headers (body not included in HMAC — server uses path-only verification)
+      // Build L2 auth headers
       const l2Headers = await buildL2Headers(
         credentials, publicKeyBase58, 'POST', '/api/v1/orders',
       );
@@ -63,6 +78,8 @@ export function usePlaceOrder() {
       const params: PlaceOrderParams = {
         ...unsignedParams,
         signature,
+        // Include session_pubkey so server knows to verify against session key
+        ...(canUseSession ? { sessionPubkey } : {}),
       };
 
       return ordersApi.place(params);
