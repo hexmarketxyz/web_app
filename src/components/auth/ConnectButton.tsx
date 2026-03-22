@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
 import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
 import { useUsdcBalance } from '@/hooks/useUsdcBalance';
 import { useClaimAirdrop } from '@/hooks/useClaimAirdrop';
@@ -9,8 +8,7 @@ import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export function ConnectButton() {
-  const { login, ready } = usePrivy();
-  const { connected, connecting, walletLabel, publicKeyBase58, disconnect } =
+  const { connected, connecting, walletLabel, publicKeyBase58, disconnect, ready, login } =
     useUnifiedWallet();
   const { data: balanceData } = useUsdcBalance();
   const claimAirdrop = useClaimAirdrop();
