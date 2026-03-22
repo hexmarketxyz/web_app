@@ -10,7 +10,7 @@ export interface UnifiedWallet {
   connecting: boolean;
   signMessage: ((message: Uint8Array) => Promise<Uint8Array>) | null;
   signTransaction: ((transaction: Transaction) => Promise<Transaction>) | null;
-  walletType: 'privy' | 'external' | 'okx' | null;
+  walletType: 'privy' | 'external' | 'okx' | 'binance' | null;
   walletLabel: string;
   /** true once the wallet provider is initialized */
   ready: boolean;

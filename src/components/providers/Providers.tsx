@@ -11,8 +11,10 @@ import { AuthTokenProvider } from './AuthTokenProvider';
 import { ApiCredentialsProvider } from './ApiCredentialsProvider';
 import { PrivyWalletProvider } from './PrivyWalletProvider';
 import { OkxWalletProvider } from './OkxWalletProvider';
+import { BinanceWalletProvider } from './BinanceWalletProvider';
 import { SessionKeyProvider } from './SessionKeyProvider';
 import { isOkxWalletBrowser } from '@/lib/okxDetect';
+import { isBinanceWalletBrowser } from '@/lib/binanceDetect';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,10 +65,20 @@ function OkxStack({ children }: { children: ReactNode }) {
   );
 }
 
-export function Providers({ children }: { children: ReactNode }) {
-  const isOkx = useMemo(() => isOkxWalletBrowser(), []);
+function BinanceStack({ children }: { children: ReactNode }) {
+  return (
+    <BinanceWalletProvider>
+      {children}
+    </BinanceWalletProvider>
+  );
+}
 
-  const WalletStack = isOkx ? OkxStack : PrivyStack;
+export function Providers({ children }: { children: ReactNode }) {
+  const WalletStack = useMemo(() => {
+    if (isOkxWalletBrowser()) return OkxStack;
+    if (isBinanceWalletBrowser()) return BinanceStack;
+    return PrivyStack;
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
