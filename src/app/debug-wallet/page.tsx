@@ -62,7 +62,7 @@ export default function DebugWalletPage() {
       const lk = key.toLowerCase();
       if (lk.includes('wallet') || lk.includes('solana') || lk.includes('binance') || lk.includes('phantom') || lk.includes('w3w')) {
         try {
-          const val = (window as Record<string, unknown>)[key];
+          const val = (window as unknown as Record<string, unknown>)[key];
           lines.push(`  window.${key} = ${typeof val}`);
         } catch {
           lines.push(`  window.${key} = (access error)`);
