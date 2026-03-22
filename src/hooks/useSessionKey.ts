@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Keypair } from '@solana/web3.js';
 import * as bs58 from 'bs58';
-import { buildDelegationMessage, buildAuthToken } from '@hexmarket/sdk';
+import { buildDelegationMessage } from '@hexmarket/sdk';
 import { useUnifiedWallet } from './useUnifiedWallet';
 import nacl from 'tweetnacl';
 
@@ -89,22 +89,18 @@ export function useSessionKey(): SessionKeyState {
       const sessionPubkey = keypair.publicKey.toBase58();
       const expiresAt = Math.floor(Date.now() / 1000) + SESSION_LIFETIME_SECS;
 
-      // 2. Build delegation message and sign with wallet (1 signature popup)
+      // 2. Build delegation message and sign with wallet (single signature popup)
       const delegationMsg = buildDelegationMessage(sessionPubkey, expiresAt);
       const delegationSigBytes = await signMessage(delegationMsg);
       const delegationSig = bs58.encode(delegationSigBytes);
 
-      // 3. Build auth token with wallet for the registration call
-      const authToken = await buildAuthToken(publicKeyBase58, signMessage);
-
-      // 4. Register session key on server
+      // 3. Register session key on server (no Bearer token needed —
+      //    identity is verified through user_pubkey + delegation_signature)
       const res = await fetch(`${API_URL}/api/v1/auth/session`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          user_pubkey: publicKeyBase58,
           session_pubkey: sessionPubkey,
           delegation_signature: delegationSig,
           expires_at: expiresAt,
