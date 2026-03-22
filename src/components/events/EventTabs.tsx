@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 
 interface Tab {
   key: string;
@@ -14,6 +14,13 @@ interface EventTabsProps {
 
 export function EventTabs({ tabs }: EventTabsProps) {
   const [activeKey, setActiveKey] = useState(tabs[0]?.key);
+
+  // If the active tab no longer exists in the list, fall back to the first available tab
+  useEffect(() => {
+    if (tabs.length > 0 && !tabs.some((t) => t.key === activeKey)) {
+      setActiveKey(tabs[0].key);
+    }
+  }, [tabs, activeKey]);
 
   const activeTab = tabs.find((t) => t.key === activeKey);
 
