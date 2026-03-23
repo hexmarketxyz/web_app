@@ -79,7 +79,7 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
       },
       rightPriceScale: {
         borderVisible: false,
-        autoScale: false,
+        autoScale: true,
       },
       timeScale: {
         borderVisible: false,
