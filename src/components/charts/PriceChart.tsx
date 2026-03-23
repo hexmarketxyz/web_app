@@ -61,6 +61,7 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
       rightPriceScale: {
         borderVisible: false,
         autoScale: true,
+        scaleMargins: { top: 0, bottom: 0 },
       },
       timeScale: {
         borderVisible: false,
