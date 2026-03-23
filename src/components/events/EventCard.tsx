@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { EventListItem, EventDetail, Outcome, MarketDetail } from '@hexmarket/sdk';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
-import { useBookBestAsk } from '@/hooks/useBookPrice';
 import type { Locale } from '@/i18n/config';
 
 import { imageUrl } from '@/lib/imageUrl';
@@ -182,8 +181,8 @@ export function EventCard({ event }: EventCardProps) {
             <h3 className="flex-1 font-semibold group-hover:text-hex-blue transition leading-snug">
               {translateDynamic(event.title, event.titleTranslations, locale)}
             </h3>
-            <BookProbabilityRing
-              outcomeId={markets[0].outcomes[0]?.id}
+            <ProbabilityRing
+              pct={Number(((markets[0].probability ?? 0) * 100).toFixed(0))}
               chanceLabel={t('event.chance')}
             />
           </div>
@@ -219,18 +218,9 @@ export function EventCard({ event }: EventCardProps) {
   );
 }
 
-/** Probability ring that reads from merged orderbook. */
-function BookProbabilityRing({ outcomeId, chanceLabel }: { outcomeId?: string; chanceLabel: string }) {
-  const bestAsk = useBookBestAsk(outcomeId ?? '');
-  const pct = Number((bestAsk * 100).toFixed(0));
-  return <ProbabilityRing pct={pct} chanceLabel={chanceLabel} />;
-}
-
-/** Multi-market card row with orderbook-derived probability. */
+/** Multi-market card row using API-provided probability. */
 function MultiMarketRow({ market, locale }: { market: MarketDetail; locale: Locale }) {
-  const firstOutcome = market.outcomes[0];
-  const bestAsk = useBookBestAsk(firstOutcome?.id ?? '');
-  const pct = (bestAsk * 100).toFixed(0);
+  const pct = ((market.probability ?? 0) * 100).toFixed(0);
 
   return (
     <div className="flex items-center gap-3">

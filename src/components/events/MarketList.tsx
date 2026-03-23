@@ -7,7 +7,6 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 import { usePortfolioPositions } from '@/hooks/usePortfolioPositions';
 import { useAllOpenOrders } from '@/hooks/useAllOpenOrders';
-import { useBookBestAsk } from '@/hooks/useBookPrice';
 import { MarketDetailPanel } from './MarketDetailPanel';
 
 import type { Locale } from '@/i18n/config';
@@ -68,13 +67,8 @@ function MarketRow({ market, outcomes, selectedId, onSelect, eventSlug, onBuy, o
 
   const firstOutcome = market.outcomes[0];
 
-  // Use best ask from orderbook for Yes outcome as probability
-  const yesOutcome = market.outcomes.find((o) => {
-    const lbl = o.label.toLowerCase();
-    return lbl === 'yes' || lbl === 'up';
-  }) ?? firstOutcome;
-  const yesBestAsk = useBookBestAsk(yesOutcome?.id ?? '');
-  const pct = (yesBestAsk * 100).toFixed(0);
+  // Use API-provided probability
+  const pct = ((market.probability ?? 0) * 100).toFixed(0);
 
   // Badges: open orders and positions for this market
   const marketOutcomeIds = new Set(market.outcomes.map((o) => o.id));
@@ -131,6 +125,7 @@ function MarketRow({ market, outcomes, selectedId, onSelect, eventSlug, onBuy, o
                 key={o.id}
                 outcome={o}
                 locale={locale}
+                bestAsk={market.bestAsks?.[o.id] ?? 0}
                 isSelected={o.id === selectedId}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -170,6 +165,7 @@ function MarketRow({ market, outcomes, selectedId, onSelect, eventSlug, onBuy, o
               key={o.id}
               outcome={o}
               locale={locale}
+              bestAsk={market.bestAsks?.[o.id] ?? 0}
               onBuy={onBuy}
             />
           ))}
@@ -225,21 +221,22 @@ function MarketRow({ market, outcomes, selectedId, onSelect, eventSlug, onBuy, o
   );
 }
 
-/* ─── Buy Buttons (use orderbook hook) ─────────────────────── */
+/* ─── Buy Buttons (use API-provided bestAsk) ──────────────── */
 
 function OutcomeBuyButton({
   outcome,
   locale,
+  bestAsk,
   isSelected,
   onClick,
 }: {
   outcome: Outcome;
   locale: Locale;
+  bestAsk: number;
   isSelected: boolean;
   onClick: (e: React.MouseEvent) => void;
 }) {
   const { t } = useTranslation();
-  const bestAsk = useBookBestAsk(outcome.id);
   const price = (bestAsk * 100).toFixed(0);
   const lbl = outcome.label.toLowerCase();
   const isYes = lbl === 'yes' || lbl === 'up';
@@ -266,14 +263,15 @@ function OutcomeBuyButton({
 function MobileBuyButton({
   outcome,
   locale,
+  bestAsk,
   onBuy,
 }: {
   outcome: Outcome;
   locale: Locale;
+  bestAsk: number;
   onBuy?: (outcomeId: string) => void;
 }) {
   const { t } = useTranslation();
-  const bestAsk = useBookBestAsk(outcome.id);
   const price = (bestAsk * 100).toFixed(0);
   const lbl = outcome.label.toLowerCase();
   const isYes = lbl === 'yes' || lbl === 'up';

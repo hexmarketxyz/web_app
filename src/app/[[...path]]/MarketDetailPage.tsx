@@ -12,7 +12,6 @@ import { useUserTrades } from '@/hooks/useUserTrades';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 import { PriceChart } from '@/components/charts/PriceChart';
-import { useBookBestAsk } from '@/hooks/useBookPrice';
 import { EventTradePanel, type SellRequest } from '@/components/events/EventTradePanel';
 import { EventTabs } from '@/components/events/EventTabs';
 import { EventPositionsSection } from '@/components/events/EventPositionsSection';
@@ -341,22 +340,22 @@ function MarketBadges({ outcomes }: { outcomes: Outcome[] }) {
   );
 }
 
-function MarketProbability({ outcomeId }: { outcomeId: string }) {
+function MarketProbability({ probability }: { probability?: number }) {
   const { t } = useTranslation();
-  const bestAsk = useBookBestAsk(outcomeId);
-  const pct = (bestAsk * 100).toFixed(0);
+  const pct = ((probability ?? 0) * 100).toFixed(0);
   return <span className="text-2xl font-bold text-green-400">{pct}% {t('event.chance')}</span>;
 }
 
 function BottomBuyButton({
   outcome,
+  bestAsk,
   onBuy,
 }: {
   outcome: Outcome;
+  bestAsk: number;
   onBuy: () => void;
 }) {
   const { t, locale } = useTranslation();
-  const bestAsk = useBookBestAsk(outcome.id);
   const price = (bestAsk * 100).toFixed(0);
   const lbl = outcome.label.toLowerCase();
   const isYes = lbl === 'yes' || lbl === 'up';
@@ -473,7 +472,7 @@ export default function MarketDetailPage() {
 
         {/* Probability + volume */}
         <div className="flex items-center gap-3">
-          {firstOutcome && <MarketProbability outcomeId={firstOutcome.id} />}
+          <MarketProbability probability={market.probability} />
           <span className="text-sm text-theme-tertiary">{formatVolume(totalVolume)} {t('event.vol')}</span>
         </div>
 
@@ -501,6 +500,7 @@ export default function MarketDetailPage() {
               <BottomBuyButton
                 key={o.id}
                 outcome={o}
+                bestAsk={market.bestAsks?.[o.id] ?? 0}
                 onBuy={() => {
                   setSelectedOutcomeId(o.id);
                   setShowTradeModal(true);

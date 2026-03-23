@@ -8,7 +8,6 @@ import { useAllOpenOrders } from '@/hooks/useAllOpenOrders';
 import { useToast } from '@/components/ui/Toast';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
-import { useBookBestAsk } from '@/hooks/useBookPrice';
 import type { Locale } from '@/i18n/config';
 import type { Outcome, EventDetail } from '@hexmarket/sdk';
 
@@ -363,6 +362,7 @@ export function EventTradePanel({
           <OutcomeSelectorButton
             key={o.id}
             outcome={o}
+            bestAsk={market?.bestAsks?.[o.id] ?? 0}
             isActive={o.id === outcome.id}
             locale={locale}
             onSelect={() => onSelectOutcome(o.id)}
@@ -883,20 +883,21 @@ function LimitSellBody({
   );
 }
 
-/* ─── Outcome Selector Button (uses orderbook price) ──────── */
+/* ─── Outcome Selector Button (uses API-provided bestAsk) ─── */
 
 function OutcomeSelectorButton({
   outcome,
+  bestAsk,
   isActive,
   locale,
   onSelect,
 }: {
   outcome: Outcome;
+  bestAsk: number;
   isActive: boolean;
   locale: Locale;
   onSelect: () => void;
 }) {
-  const bestAsk = useBookBestAsk(outcome.id);
   const priceCents = (bestAsk * 100).toFixed(1);
 
   return (
