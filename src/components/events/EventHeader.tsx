@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import Link from 'next/link';
 import type { EventDetail } from '@hexmarket/sdk';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
@@ -90,12 +89,12 @@ export function EventHeader({ event }: EventHeaderProps) {
                   {event.tags.map((tag, i) => (
                     <span key={tag.id} className="flex items-center gap-1">
                       {i > 0 && <span className="text-theme-tertiary">·</span>}
-                      <Link
+                      <a
                         href={`/category/${tag.slug}`}
                         className="hover:text-hex-blue transition"
                       >
                         {translateDynamic(tag.label, tag.labelTranslations, locale)}
-                      </Link>
+                      </a>
                     </span>
                   ))}
                 </div>

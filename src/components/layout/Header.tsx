@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@/components/auth/ConnectButton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -78,12 +77,12 @@ export function Header() {
           {/* Mobile dropdown menu */}
           {menuOpen && (
             <div className="absolute left-0 top-full mt-2 w-56 bg-hex-card border border-hex-border rounded-lg shadow-lg z-50 py-1">
-              <Link
+              <a
                 href="/portfolio"
                 className="block px-4 py-2.5 text-sm text-theme-secondary hover:text-theme-primary hover:bg-hex-overlay/5 transition"
               >
                 {t('nav.portfolio')}
-              </Link>
+              </a>
               <div className="border-t border-hex-border my-1" />
               <div className="px-4 py-2.5 flex items-center justify-between">
                 <span className="text-xs text-theme-tertiary">{t('common.language')}</span>
@@ -98,26 +97,26 @@ export function Header() {
         </div>
 
         {/* Desktop: logo */}
-        <Link href="/" className="shrink-0 hidden md:block">
+        <a href="/" className="shrink-0 hidden md:block">
           <HexLogo size={28} />
-        </Link>
+        </a>
 
         {/* Desktop: spacer */}
         <div className="hidden md:block flex-1" />
 
         {/* Desktop: right side utilities */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
-          <Link href="/portfolio" className={linkClass('/portfolio')}>
+          <a href="/portfolio" className={linkClass('/portfolio')}>
             {t('nav.portfolio')}
-          </Link>
+          </a>
           <LanguageSelector />
           <ThemeToggle />
         </div>
 
         {/* Mobile: wordmark only */}
-        <Link href="/" className="shrink-0 md:hidden">
+        <a href="/" className="shrink-0 md:hidden">
           <HexLogo size={28} wordmarkOnly />
-        </Link>
+        </a>
 
         {/* Spacer to push connect button right on mobile */}
         <div className="flex-1 md:hidden" />
@@ -133,17 +132,17 @@ export function Header() {
         <div className="border-t border-hex-border/50 overflow-x-auto scrollbar-hide">
           <div className="container mx-auto px-4">
             <div className="flex items-center gap-1 py-2 whitespace-nowrap">
-              <Link href="/" className={linkClass('/')}>
+              <a href="/" className={linkClass('/')}>
                 {t('nav.trending')}
-              </Link>
+              </a>
               {tags.map((tag) => (
-                <Link
+                <a
                   key={tag.id}
                   href={`/category/${tag.slug}`}
                   className={linkClass(`/category/${tag.slug}`)}
                 >
                   {translateDynamic(tag.label, tag.labelTranslations, locale)}
-                </Link>
+                </a>
               ))}
             </div>
           </div>

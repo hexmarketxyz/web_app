@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import type { EventListItem, Outcome, MarketDetail } from '@hexmarket/sdk';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
@@ -154,7 +153,7 @@ export function EventCard({ event }: EventCardProps) {
   const isSingleMarket = markets.length <= 1;
 
   return (
-    <Link
+    <a
       href={`/events/${event.slug}`}
       className="bg-hex-card rounded-xl p-5 border border-hex-border hover:border-hex-blue transition group flex flex-col"
     >
@@ -200,7 +199,7 @@ export function EventCard({ event }: EventCardProps) {
       <div className="mt-auto pt-3 text-xs text-theme-tertiary">
         {formatVolume(totalVolume)} {t('event.vol')}
       </div>
-    </Link>
+    </a>
   );
 }
 

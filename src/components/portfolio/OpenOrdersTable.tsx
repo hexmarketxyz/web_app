@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 /* eslint-disable @next/next/no-img-element */
-import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 import { getMarketDisplayName } from './getMarketDisplayName';
@@ -95,7 +94,7 @@ export function OpenOrdersTable({ orders, outcomeMap, eventSlugMap, eventContext
                 return (
                   <tr key={order.id} className="border-b border-hex-border/50 hover:bg-hex-overlay/5 transition">
                     <td className="py-3">
-                      <Link href={href} className="flex items-center gap-3 hover:text-hex-blue transition">
+                      <a href={href} className="flex items-center gap-3 hover:text-hex-blue transition">
                         {iconUrl && (
                           <img
                             src={imageUrl(iconUrl)}
@@ -112,7 +111,7 @@ export function OpenOrdersTable({ orders, outcomeMap, eventSlugMap, eventContext
                           </div>
                           <p className="text-xs text-theme-tertiary mt-0.5">{label} @ {(order.price * 100).toFixed(0)}¢</p>
                         </div>
-                      </Link>
+                      </a>
                     </td>
                     <td className="py-3 text-right font-mono text-theme-secondary">
                       {order.filledQuantity}/{order.quantity} ({fillPct}%)

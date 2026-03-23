@@ -2,7 +2,6 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useRouteParams } from '@/hooks/useRouteParams';
-import Link from 'next/link';
 import { useTag } from '@/hooks/useTags';
 import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/events/EventCard';
@@ -34,7 +33,7 @@ export default function CategoryPage() {
         {/* Sub-tag pills */}
         {tagDetail.children.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
-            <Link
+            <a
               href={`/category/${slug}`}
               className={`px-3 py-1.5 rounded-full text-sm transition ${
                 !subTag
@@ -43,9 +42,9 @@ export default function CategoryPage() {
               }`}
             >
               {t('common.all')}
-            </Link>
+            </a>
             {tagDetail.children.map((child) => (
-              <Link
+              <a
                 key={child.id}
                 href={`/category/${slug}?sub=${child.slug}`}
                 className={`px-3 py-1.5 rounded-full text-sm transition ${
@@ -55,7 +54,7 @@ export default function CategoryPage() {
                 }`}
               >
                 {translateDynamic(child.label, child.labelTranslations, locale)}
-              </Link>
+              </a>
             ))}
           </div>
         )}

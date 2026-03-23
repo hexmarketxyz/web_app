@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 /* eslint-disable @next/next/no-img-element */
-import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 import { getMarketDisplayName } from './getMarketDisplayName';
@@ -153,7 +152,7 @@ export function TradeHistoryTable({ trades, outcomeMap, eventSlugMap, eventConte
                       <span className="text-theme-secondary ml-1.5">{label}</span>
                     </td>
                     <td className="py-3">
-                      <Link href={href} className="flex items-center gap-3 hover:text-hex-blue transition">
+                      <a href={href} className="flex items-center gap-3 hover:text-hex-blue transition">
                         {iconUrl && (
                           <img
                             src={imageUrl(iconUrl)}
@@ -162,7 +161,7 @@ export function TradeHistoryTable({ trades, outcomeMap, eventSlugMap, eventConte
                           />
                         )}
                         <p className="text-theme-primary truncate max-w-xs">{displayName}</p>
-                      </Link>
+                      </a>
                     </td>
                     <td className="py-3 text-right font-mono text-theme-secondary">
                       {(price * 100).toFixed(1)}¢
