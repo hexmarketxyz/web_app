@@ -35,7 +35,7 @@ interface WsMergedBookUpdate {
 
 function parseLevel([tick, qty, source]: [number, number, string]): MergedPriceLevel {
   return {
-    price: tick / 100,
+    price: tick / 1000,
     quantity: qty,
     source: (source as LiquiditySource) || 'direct',
   };

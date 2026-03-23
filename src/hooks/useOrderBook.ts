@@ -59,11 +59,11 @@ export function useOrderBook(outcomeId: string) {
       const orderbook: OrderBook = {
         outcomeId: update.outcome_id,
         bids: (yesBook.bids || []).map(([tick, qty]) => ({
-          price: tick / 100,
+          price: tick / 1000,
           quantity: qty,
         })),
         asks: (yesBook.asks || []).map(([tick, qty]) => ({
-          price: tick / 100,
+          price: tick / 1000,
           quantity: qty,
         })),
         timestamp: new Date().toISOString(),
