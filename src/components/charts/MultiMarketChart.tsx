@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { createChart, type IChartApi, type ISeriesApi, ColorType } from 'lightweight-charts';
 import { usePriceHistory } from '@/hooks/usePriceHistory';
 import { useThemeStore } from '@/stores/themeStore';
@@ -35,7 +35,9 @@ function getChartColors() {
   };
 }
 
-/** Fetches price snapshots for one outcome and reports data via callback. */
+type ChartPoint = { time: number; value: number };
+
+/** Fetches snapshots for one outcome, stores result in parent state. */
 function MarketLineFetcher({
   outcomeId,
   index,
@@ -45,12 +47,12 @@ function MarketLineFetcher({
   outcomeId: string;
   index: number;
   from?: string;
-  onData: (index: number, data: { time: number; value: number }[]) => void;
+  onData: (index: number, data: ChartPoint[]) => void;
 }) {
   const { data: snapshots } = usePriceHistory(outcomeId, { from, limit: 500 });
 
   useEffect(() => {
-    if (!snapshots?.length) return;
+    if (!snapshots) return;
 
     const points = snapshots
       .filter((s) => s.price != null)
@@ -60,7 +62,7 @@ function MarketLineFetcher({
       }))
       .sort((a, b) => a.time - b.time);
 
-    if (points.length > 0) onData(index, points);
+    onData(index, points);
   }, [snapshots, index, onData]);
 
   return null;
@@ -73,6 +75,7 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
   const [range, setRange] = useState(1); // default 24H
   const resolved = useThemeStore((s) => s.resolved);
   const { locale } = useTranslation();
+  const [chartReady, setChartReady] = useState(false);
 
   const displayMarkets = useMemo(() => markets.slice(0, 4), [markets]);
   const marketCount = displayMarkets.length;
@@ -85,9 +88,19 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
     return new Date(now - selectedRange.hours * 3600 * 1000).toISOString();
   }, [selectedRange.hours, range]);
 
+  // Store fetched data per market index
+  const [lineData, setLineData] = useState<Record<number, ChartPoint[]>>({});
+
+  const handleLineData = useMemo(() => {
+    return (index: number, data: ChartPoint[]) => {
+      setLineData((prev) => ({ ...prev, [index]: data }));
+    };
+  }, []);
+
   // Create chart
   useEffect(() => {
     if (!containerRef.current) return;
+    setChartReady(false);
     const colors = getChartColors();
 
     const chart = createChart(containerRef.current, {
@@ -132,6 +145,7 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
 
     chartRef.current = chart;
     seriesRefs.current = series;
+    setChartReady(true);
 
     const observer = new ResizeObserver(() => {
       if (containerRef.current) {
@@ -145,6 +159,7 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
       chart.remove();
       chartRef.current = null;
       seriesRefs.current = [];
+      setChartReady(false);
     };
   }, [marketCount]);
 
@@ -161,16 +176,19 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
     });
   }, [resolved]);
 
-  // Callback for when a line fetcher delivers data
-  const handleLineData = useCallback(
-    (index: number, data: { time: number; value: number }[]) => {
-      const series = seriesRefs.current[index];
-      if (!series) return;
-      series.setData(data as any);
-      chartRef.current?.timeScale().fitContent();
-    },
-    [],
-  );
+  // Update chart data when chart is ready or data changes
+  useEffect(() => {
+    if (!chartReady || !chartRef.current) return;
+
+    for (let i = 0; i < marketCount; i++) {
+      const data = lineData[i];
+      const series = seriesRefs.current[i];
+      if (data?.length && series) {
+        series.setData(data as any);
+      }
+    }
+    chartRef.current.timeScale().fitContent();
+  }, [chartReady, lineData, marketCount]);
 
   return (
     <div>
@@ -212,7 +230,7 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
         </div>
       )}
 
-      {/* Data fetchers (render nothing, just fetch data via hooks) */}
+      {/* Data fetchers — store results in state, chart effect reads them */}
       {displayMarkets.map((m, i) => {
         const oid = m.outcomes[0]?.id;
         if (!oid) return null;
