@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { createChart, type IChartApi, type ISeriesApi, ColorType } from 'lightweight-charts';
-import { usePriceHistory } from '@/hooks/usePriceHistory';
+import { useMultiChartData } from '@/hooks/useChartData';
 import { useThemeStore } from '@/stores/themeStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
@@ -35,39 +35,6 @@ function getChartColors() {
   };
 }
 
-type ChartPoint = { time: number; value: number };
-
-/** Fetches snapshots for one outcome, stores result in parent state. */
-function MarketLineFetcher({
-  outcomeId,
-  index,
-  from,
-  onData,
-}: {
-  outcomeId: string;
-  index: number;
-  from?: string;
-  onData: (index: number, data: ChartPoint[]) => void;
-}) {
-  const { data: snapshots } = usePriceHistory(outcomeId, { from, limit: 500 });
-
-  useEffect(() => {
-    if (!snapshots) return;
-
-    const points = snapshots
-      .filter((s) => s.price != null)
-      .map((s) => ({
-        time: Math.floor(new Date(s.capturedAt).getTime() / 1000),
-        value: Number(s.price),
-      }))
-      .sort((a, b) => a.time - b.time);
-
-    onData(index, points);
-  }, [snapshots, index, onData]);
-
-  return null;
-}
-
 export function MultiMarketChart({ markets }: MultiMarketChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -75,32 +42,28 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
   const [range, setRange] = useState(1); // default 24H
   const resolved = useThemeStore((s) => s.resolved);
   const { locale } = useTranslation();
-  const [chartReady, setChartReady] = useState(false);
 
   const displayMarkets = useMemo(() => markets.slice(0, 4), [markets]);
   const marketCount = displayMarkets.length;
+  const outcomeIds = useMemo(
+    () => displayMarkets.map((m) => m.outcomes[0]?.id).filter(Boolean),
+    [displayMarkets],
+  );
 
   const selectedRange = TIME_RANGES[range];
   const from = useMemo(() => {
     if (!selectedRange.hours) return undefined;
-    const BUCKET = 5 * 60 * 1000;
+    const BUCKET = 60 * 1000;
     const now = Math.floor(Date.now() / BUCKET) * BUCKET;
     return new Date(now - selectedRange.hours * 3600 * 1000).toISOString();
   }, [selectedRange.hours, range]);
 
-  // Store fetched data per market index
-  const [lineData, setLineData] = useState<Record<number, ChartPoint[]>>({});
-
-  const handleLineData = useMemo(() => {
-    return (index: number, data: ChartPoint[]) => {
-      setLineData((prev) => ({ ...prev, [index]: data }));
-    };
-  }, []);
+  // Single batch API call for all outcomes
+  const { data: allChartData } = useMultiChartData(outcomeIds, { from, limit: 500 });
 
   // Create chart
   useEffect(() => {
     if (!containerRef.current) return;
-    setChartReady(false);
     const colors = getChartColors();
 
     const chart = createChart(containerRef.current, {
@@ -148,7 +111,6 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
 
     chartRef.current = chart;
     seriesRefs.current = series;
-    setChartReady(true);
 
     const observer = new ResizeObserver(() => {
       if (containerRef.current) {
@@ -162,7 +124,6 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
       chart.remove();
       chartRef.current = null;
       seriesRefs.current = [];
-      setChartReady(false);
     };
   }, [marketCount]);
 
@@ -179,19 +140,20 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
     });
   }, [resolved]);
 
-  // Update chart data when chart is ready or data changes
+  // Update chart data
   useEffect(() => {
-    if (!chartReady || !chartRef.current) return;
+    if (!chartRef.current || !allChartData) return;
 
-    for (let i = 0; i < marketCount; i++) {
-      const data = lineData[i];
+    for (let i = 0; i < displayMarkets.length; i++) {
+      const oid = displayMarkets[i].outcomes[0]?.id;
+      const data = oid ? allChartData[oid] : undefined;
       const series = seriesRefs.current[i];
       if (data?.length && series) {
         series.setData(data as any);
       }
     }
     chartRef.current.timeScale().fitContent();
-  }, [chartReady, lineData, marketCount]);
+  }, [allChartData, displayMarkets]);
 
   return (
     <div>
@@ -232,21 +194,6 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
           ))}
         </div>
       )}
-
-      {/* Data fetchers — store results in state, chart effect reads them */}
-      {displayMarkets.map((m, i) => {
-        const oid = m.outcomes[0]?.id;
-        if (!oid) return null;
-        return (
-          <MarketLineFetcher
-            key={oid}
-            outcomeId={oid}
-            index={i}
-            from={from}
-            onData={handleLineData}
-          />
-        );
-      })}
     </div>
   );
 }

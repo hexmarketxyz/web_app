@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { createChart, type IChartApi, type ISeriesApi, ColorType } from 'lightweight-charts';
-import { usePriceHistory } from '@/hooks/usePriceHistory';
+import { useChartData } from '@/hooks/useChartData';
 import { useThemeStore } from '@/stores/themeStore';
 
 interface PriceChartProps {
@@ -29,38 +29,22 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Area'> | null>(null);
-  const [range, setRange] = useState(1); // index into TIME_RANGES (default 24H)
+  const [range, setRange] = useState(1); // default 24H
   const resolved = useThemeStore((s) => s.resolved);
 
   const selectedRange = TIME_RANGES[range];
-  // Round `from` to the nearest 5-minute bucket so the query key stays stable
-  // across re-renders, preventing redundant API requests.
   const from = useMemo(() => {
     if (!selectedRange.hours) return undefined;
-    const BUCKET = 5 * 60 * 1000;
+    const BUCKET = 60 * 1000; // 1-min bucket
     const now = Math.floor(Date.now() / BUCKET) * BUCKET;
     return new Date(now - selectedRange.hours * 3600 * 1000).toISOString();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRange.hours, range]);
 
-  const { data: snapshots } = usePriceHistory(outcomeId, { from, limit: 500 });
-
-  const chartData = useMemo(() => {
-    if (!snapshots?.length) return [];
-
-    return snapshots
-      .filter((s) => s.price != null)
-      .map((s) => ({
-        time: Math.floor(new Date(s.capturedAt).getTime() / 1000) as any,
-        value: Number(s.price),
-      }))
-      .sort((a, b) => a.time - b.time);
-  }, [snapshots]);
+  const { data: chartData } = useChartData(outcomeId, { from, limit: 500 });
 
   // Create chart
   useEffect(() => {
     if (!containerRef.current) return;
-
     const colors = getChartColors();
 
     const chart = createChart(containerRef.current, {
@@ -99,6 +83,9 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
         type: 'custom',
         formatter: (p: number) => `${(p * 100).toFixed(0)}%`,
       },
+      autoscaleInfoProvider: () => ({
+        priceRange: { minValue: 0, maxValue: 1 },
+      }),
     });
 
     chartRef.current = chart;
@@ -106,9 +93,7 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
 
     const observer = new ResizeObserver(() => {
       if (containerRef.current) {
-        chart.applyOptions({
-          width: containerRef.current.clientWidth,
-        });
+        chart.applyOptions({ width: containerRef.current.clientWidth });
       }
     });
     observer.observe(containerRef.current);
@@ -121,7 +106,7 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
     };
   }, []);
 
-  // Re-apply theme colors when theme changes
+  // Re-apply theme colors
   useEffect(() => {
     if (!chartRef.current) return;
     const colors = getChartColors();
@@ -136,16 +121,9 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
 
   // Update data
   useEffect(() => {
-    if (!seriesRef.current || !chartData.length) return;
-
-    seriesRef.current.setData(chartData);
+    if (!seriesRef.current || !chartData?.length) return;
+    seriesRef.current.setData(chartData as any);
     chartRef.current?.timeScale().fitContent();
-    // Fix Y-axis to 0%-100%
-    seriesRef.current.applyOptions({
-      autoscaleInfoProvider: () => ({
-        priceRange: { minValue: 0, maxValue: 1 },
-      }),
-    });
   }, [chartData]);
 
   return (
