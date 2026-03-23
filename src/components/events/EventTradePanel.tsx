@@ -66,7 +66,7 @@ export function EventTradePanel({
 
   const hasSellRequest = sellRequest != null && sellRequest.outcomeId === outcome.id;
   const [side, setSide] = useState<TradeSide>(() => hasSellRequest ? 'sell' : 'buy');
-  const [orderType, setOrderType] = useState<OrderMode>(() => hasSellRequest ? 'market' : 'limit');
+  const [orderType, setOrderType] = useState<OrderMode>('market');
   const [shares, setShares] = useState(() => hasSellRequest ? sellRequest.quantity : 0);
   const [amount, setAmount] = useState(0); // dollars for market buy
   const [expirationOn, setExpirationOn] = useState(false);
