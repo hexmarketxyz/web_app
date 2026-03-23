@@ -8,6 +8,8 @@ import { useAllOpenOrders } from '@/hooks/useAllOpenOrders';
 import { useToast } from '@/components/ui/Toast';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
+import { useBookBestAsk } from '@/hooks/useBookPrice';
+import type { Locale } from '@/i18n/config';
 import type { Outcome, EventDetail } from '@hexmarket/sdk';
 
 import { imageUrl } from '@/lib/imageUrl';
@@ -357,24 +359,15 @@ export function EventTradePanel({
 
       {/* Outcome selector */}
       <div className="flex gap-2 px-4 pb-3">
-        {marketOutcomes.map((o) => {
-          const priceCents = ((o.price ?? 0.5) * 100).toFixed(1);
-          const isActive = o.id === outcome.id;
-          return (
-            <button
-              key={o.id}
-              type="button"
-              onClick={() => onSelectOutcome(o.id)}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${
-                isActive
-                  ? 'bg-hex-green/20 text-hex-green border border-hex-green/40'
-                  : 'bg-hex-dark text-theme-secondary border border-hex-border hover:border-hex-border-hover'
-              }`}
-            >
-              {translateDynamic(o.label, o.labelTranslations, locale)} {priceCents}¢
-            </button>
-          );
-        })}
+        {marketOutcomes.map((o) => (
+          <OutcomeSelectorButton
+            key={o.id}
+            outcome={o}
+            isActive={o.id === outcome.id}
+            locale={locale}
+            onSelect={() => onSelectOutcome(o.id)}
+          />
+        ))}
       </div>
 
       {/* Mode-specific body */}
@@ -887,5 +880,36 @@ function LimitSellBody({
         </div>
       </div>
     </>
+  );
+}
+
+/* ─── Outcome Selector Button (uses orderbook price) ──────── */
+
+function OutcomeSelectorButton({
+  outcome,
+  isActive,
+  locale,
+  onSelect,
+}: {
+  outcome: Outcome;
+  isActive: boolean;
+  locale: Locale;
+  onSelect: () => void;
+}) {
+  const bestAsk = useBookBestAsk(outcome.id);
+  const priceCents = (bestAsk * 100).toFixed(1);
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${
+        isActive
+          ? 'bg-hex-green/20 text-hex-green border border-hex-green/40'
+          : 'bg-hex-dark text-theme-secondary border border-hex-border hover:border-hex-border-hover'
+      }`}
+    >
+      {translateDynamic(outcome.label, outcome.labelTranslations, locale)} {priceCents}¢
+    </button>
   );
 }
