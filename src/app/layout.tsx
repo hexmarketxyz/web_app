@@ -10,6 +10,9 @@ export const metadata: Metadata = {
 
 const themeScript = `(function(){try{var m=localStorage.getItem('hex-theme')||'dark';var t=m;if(m==='auto'){var h=new Date().getHours();t=h>=6&&h<18?'light':'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
 const localeScript = `(function(){try{var l=localStorage.getItem('hex-locale')||'en';document.documentElement.setAttribute('lang',l);}catch(e){}})();`;
+// Save native pushState/replaceState before Next.js patches them.
+// SPA navigation uses these to avoid triggering Next.js RSC fetches.
+const saveHistoryScript = `(function(){window.__nativePushState=window.history.pushState.bind(window.history);window.__nativeReplaceState=window.history.replaceState.bind(window.history);})();`;
 
 export default function RootLayout({
   children,
@@ -19,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: saveHistoryScript }} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script dangerouslySetInnerHTML={{ __html: localeScript }} />
       </head>

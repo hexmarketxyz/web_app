@@ -2,6 +2,22 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
+declare global {
+  interface Window {
+    __nativePushState?: typeof history.pushState;
+    __nativeReplaceState?: typeof history.replaceState;
+  }
+}
+
+/** Use native pushState to bypass Next.js router interception */
+function nativePushState(url: string) {
+  if (window.__nativePushState) {
+    window.__nativePushState(null, '', url);
+  } else {
+    window.history.pushState(null, '', url);
+  }
+}
+
 interface SpaNav {
   pathname: string;
   navigate: (href: string) => void;
@@ -36,7 +52,7 @@ export function SpaNavigationProvider({ children }: { children: ReactNode }) {
   const navigate = useCallback((href: string) => {
     const url = new URL(href, window.location.origin);
     if (url.pathname !== pathname || url.search !== window.location.search) {
-      window.history.pushState(null, '', href);
+      nativePushState(href);
       setPathname(url.pathname);
       window.scrollTo(0, 0);
     }
@@ -70,7 +86,7 @@ export function SpaNavigationProvider({ children }: { children: ReactNode }) {
 
       const url = new URL(href, window.location.origin);
       if (url.pathname !== window.location.pathname || url.search !== window.location.search) {
-        window.history.pushState(null, '', href);
+        nativePushState(href);
         setPathname(url.pathname);
         window.scrollTo(0, 0);
       }
