@@ -52,6 +52,7 @@ export function useMergedOrderBook(outcomeId: string) {
       if (!res.ok) throw new Error('Failed to fetch merged order book');
       return res.json() as Promise<MergedOrderBook>;
     },
+    staleTime: 10_000,
   });
 
   useEffect(() => {

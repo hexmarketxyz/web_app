@@ -32,5 +32,6 @@ export function usePortfolioPositions() {
       return res.json();
     },
     enabled: !!publicKeyBase58 && !!credentials,
+    staleTime: 30_000,
   });
 }

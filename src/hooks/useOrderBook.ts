@@ -44,6 +44,7 @@ export function useOrderBook(outcomeId: string) {
       if (!res.ok) throw new Error('Failed to fetch order book');
       return res.json() as Promise<OrderBook>;
     },
+    staleTime: 10_000,
   });
 
   useEffect(() => {

@@ -37,5 +37,6 @@ export function useUserTrades() {
       return res.json();
     },
     enabled: !!publicKeyBase58,
+    staleTime: 30_000,
   });
 }
