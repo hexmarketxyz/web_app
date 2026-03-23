@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { EventListItem, EventDetail, Outcome, MarketDetail } from '@hexmarket/sdk';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
+import { useBookBestAsk } from '@/hooks/useBookPrice';
 import type { Locale } from '@/i18n/config';
 
 import { imageUrl } from '@/lib/imageUrl';
@@ -181,10 +182,8 @@ export function EventCard({ event }: EventCardProps) {
             <h3 className="flex-1 font-semibold group-hover:text-hex-blue transition leading-snug">
               {translateDynamic(event.title, event.titleTranslations, locale)}
             </h3>
-            <ProbabilityRing
-              pct={Number(
-                ((markets[0].outcomes[0]?.price ?? 0.5) * 100).toFixed(0),
-              )}
+            <BookProbabilityRing
+              outcomeId={markets[0].outcomes[0]?.id}
               chanceLabel={t('event.chance')}
             />
           </div>
@@ -205,25 +204,9 @@ export function EventCard({ event }: EventCardProps) {
 
           {/* Market rows */}
           <div className="space-y-3 mb-1">
-            {markets.slice(0, 2).map((market, i) => {
-              const firstOutcome = market.outcomes[0];
-              const pct = ((firstOutcome?.price ?? 0.5) * 100).toFixed(0);
-
-              return (
-                <div
-                  key={i}
-                  className="flex items-center gap-3"
-                >
-                  <span className="flex-1 text-sm text-theme-primary truncate min-w-0">
-                    {translateDynamic(market.title, market.titleTranslations, locale)}
-                  </span>
-                  <span className="font-mono font-bold text-sm flex-shrink-0 w-10 text-right">
-                    {pct}%
-                  </span>
-                  <CompactOutcomeButtons outcomes={market.outcomes} locale={locale} />
-                </div>
-              );
-            })}
+            {markets.slice(0, 2).map((market, i) => (
+              <MultiMarketRow key={i} market={market} locale={locale} />
+            ))}
           </div>
         </>
       )}
@@ -233,5 +216,31 @@ export function EventCard({ event }: EventCardProps) {
         {formatVolume(totalVolume)} {t('event.vol')}
       </div>
     </Link>
+  );
+}
+
+/** Probability ring that reads from merged orderbook. */
+function BookProbabilityRing({ outcomeId, chanceLabel }: { outcomeId?: string; chanceLabel: string }) {
+  const bestAsk = useBookBestAsk(outcomeId ?? '');
+  const pct = Number((bestAsk * 100).toFixed(0));
+  return <ProbabilityRing pct={pct} chanceLabel={chanceLabel} />;
+}
+
+/** Multi-market card row with orderbook-derived probability. */
+function MultiMarketRow({ market, locale }: { market: MarketDetail; locale: Locale }) {
+  const firstOutcome = market.outcomes[0];
+  const bestAsk = useBookBestAsk(firstOutcome?.id ?? '');
+  const pct = (bestAsk * 100).toFixed(0);
+
+  return (
+    <div className="flex items-center gap-3">
+      <span className="flex-1 text-sm text-theme-primary truncate min-w-0">
+        {translateDynamic(market.title, market.titleTranslations, locale)}
+      </span>
+      <span className="font-mono font-bold text-sm flex-shrink-0 w-10 text-right">
+        {pct}%
+      </span>
+      <CompactOutcomeButtons outcomes={market.outcomes} locale={locale} />
+    </div>
   );
 }
