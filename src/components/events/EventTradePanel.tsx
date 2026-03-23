@@ -171,22 +171,23 @@ export function EventTradePanel({
         { onSuccess: () => showLimitToast(side, shares, limitPrice * 100) },
       );
     } else if (side === 'buy') {
-      // Market buy: use best ask price (not 99¢) so balance check is realistic.
-      // IOC ensures the order doesn't rest on the book.
+      // Market buy: user specifies amount (USDC), not quantity.
+      // Use best ask to estimate qty; IOC fills at available prices up to 99¢.
+      // Backend uses `amount` for balance check instead of price × qty.
       const bestAsk = market?.bestAsks?.[outcome.id] ?? outcome.price ?? 0.5;
-      const orderPrice = Math.min(Math.ceil(bestAsk * 110) / 100, 0.99); // 10% buffer, max 99¢
-      const qty = Math.floor(amount / orderPrice);
+      const qty = Math.floor(amount / bestAsk);
       if (qty <= 0) return;
       placeOrder.mutate(
         {
           outcomeId: outcome.id,
           side: 'buy',
-          priceCents: Math.round(orderPrice * 100),
+          priceCents: 99,
           quantity: qty,
           orderType: 'market',
           timeInForce: 'ioc',
+          amount,
         },
-        { onSuccess: () => showMarketToast('buy', `$${amount.toFixed(2)} · ${qty} shares`) },
+        { onSuccess: () => showMarketToast('buy', `$${amount.toFixed(2)}`) },
       );
     } else {
       // Market sell: match at any price, never rests on book

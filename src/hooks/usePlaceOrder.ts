@@ -22,6 +22,8 @@ export interface PlaceOrderInput {
   quantity: number; // integer shares
   orderType?: OrderType;   // default 'limit'
   timeInForce?: TimeInForce; // default 'gtc'
+  /** For market buy: max USDC amount to spend (dollars). Backend uses this for balance check. */
+  amount?: number;
 }
 
 const ordersApi = new OrdersApi(API_URL);
@@ -75,11 +77,13 @@ export function usePlaceOrder() {
       );
       ordersApi.setL2Headers(l2Headers);
 
-      const params: PlaceOrderParams = {
+      const params: PlaceOrderParams & { amount?: number } = {
         ...unsignedParams,
         signature,
         // Include session_pubkey so server knows to verify against session key
         ...(canUseSession ? { sessionPubkey } : {}),
+        // For market buy: pass the spending amount for balance check
+        ...(input.amount != null ? { amount: input.amount } : {}),
       };
 
       return ordersApi.place(params);
