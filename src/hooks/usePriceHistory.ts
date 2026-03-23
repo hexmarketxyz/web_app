@@ -19,8 +19,8 @@ export function usePriceHistory(
       return res.json();
     },
     enabled: !!outcomeId,
-    staleTime: 5 * 60_000,
-    refetchInterval: 5 * 60_000,
+    staleTime: 60_000,
+    refetchInterval: 60_000,
   });
 }
 
