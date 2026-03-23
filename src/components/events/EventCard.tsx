@@ -169,7 +169,6 @@ export function EventCard({ event }: EventCardProps) {
     <Link
       href={`/events/${event.slug}`}
       onMouseEnter={prefetch}
-      onTouchStart={prefetch}
       className="bg-hex-card rounded-xl p-5 border border-hex-border hover:border-hex-blue transition group flex flex-col"
     >
       {isSingleMarket && markets.length === 1 ? (
