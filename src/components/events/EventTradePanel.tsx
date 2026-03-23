@@ -171,15 +171,17 @@ export function EventTradePanel({
         { onSuccess: () => showLimitToast(side, shares, limitPrice * 100) },
       );
     } else if (side === 'buy') {
-      // Market buy: match at any price, never rests on book
-      const currentPrice = outcome.price ?? 0.5;
-      const qty = Math.floor(amount / currentPrice);
+      // Market buy: use best ask price (not 99¢) so balance check is realistic.
+      // IOC ensures the order doesn't rest on the book.
+      const bestAsk = market?.bestAsks?.[outcome.id] ?? outcome.price ?? 0.5;
+      const orderPrice = Math.min(Math.ceil(bestAsk * 110) / 100, 0.99); // 10% buffer, max 99¢
+      const qty = Math.floor(amount / orderPrice);
       if (qty <= 0) return;
       placeOrder.mutate(
         {
           outcomeId: outcome.id,
           side: 'buy',
-          priceCents: 99,
+          priceCents: Math.round(orderPrice * 100),
           quantity: qty,
           orderType: 'market',
           timeInForce: 'ioc',
