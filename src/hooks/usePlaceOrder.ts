@@ -18,7 +18,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 export interface PlaceOrderInput {
   outcomeId: string;
   side: Side;
-  priceCents: number; // price in cents (may be fractional for sub-cent increments)
+  price: number; // price as decimal (0.001-0.999)
   quantity: number; // integer shares
   orderType?: OrderType;   // default 'limit'
   timeInForce?: TimeInForce; // default 'gtc'
@@ -47,7 +47,7 @@ export function usePlaceOrder() {
       }
 
       const nonce = generateNonce();
-      const price = input.priceCents / 100; // cents → decimal (0.01-0.99)
+      const price = input.price;
 
       const unsignedParams = {
         outcomeId: input.outcomeId,

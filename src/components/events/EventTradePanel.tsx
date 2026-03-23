@@ -163,7 +163,7 @@ export function EventTradePanel({
         {
           outcomeId: outcome.id,
           side,
-          priceCents: limitPrice * 100,
+          price: limitPrice,
           quantity: shares,
           orderType: 'limit',
           timeInForce: 'gtc',
@@ -172,7 +172,7 @@ export function EventTradePanel({
       );
     } else if (side === 'buy') {
       // Market buy: user specifies amount (USDC), not quantity.
-      // Use best ask to estimate qty; IOC fills at available prices up to 99¢.
+      // Use best ask to estimate qty; IOC fills at available prices up to 0.999.
       // Backend uses `amount` for balance check instead of price × qty.
       const bestAsk = market?.bestAsks?.[outcome.id] ?? outcome.price ?? 0.5;
       const qty = Math.floor(amount / bestAsk);
@@ -181,7 +181,7 @@ export function EventTradePanel({
         {
           outcomeId: outcome.id,
           side: 'buy',
-          priceCents: 99,
+          price: 0.999,
           quantity: qty,
           orderType: 'market',
           timeInForce: 'ioc',
@@ -195,7 +195,7 @@ export function EventTradePanel({
         {
           outcomeId: outcome.id,
           side: 'sell',
-          priceCents: 1,
+          price: 0.001,
           quantity: shares,
           orderType: 'market',
           timeInForce: 'ioc',

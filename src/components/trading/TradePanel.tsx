@@ -36,7 +36,7 @@ export function TradePanel({ outcomeId }: { outcomeId: string }) {
     placeOrder.mutate({
       outcomeId,
       side,
-      priceCents: priceNum,
+      price: priceNum / 100,
       quantity: amountNum,
     });
   };
