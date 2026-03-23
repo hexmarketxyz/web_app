@@ -1,22 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useQueryClient } from '@tanstack/react-query';
-import type { EventListItem, EventDetail, Outcome, MarketDetail } from '@hexmarket/sdk';
+import type { EventListItem, Outcome, MarketDetail } from '@hexmarket/sdk';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 import type { Locale } from '@/i18n/config';
 
 import { imageUrl } from '@/lib/imageUrl';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-
 interface EventCardProps {
   event: EventListItem;
 }
 
 /** Helper: get all outcomes from all markets in an event. */
-function allOutcomes(event: EventListItem | EventDetail): Outcome[] {
+function allOutcomes(event: EventListItem): Outcome[] {
   return event.markets.flatMap((m) => m.outcomes);
 }
 
@@ -148,7 +145,6 @@ function EventIcon({ event }: { event: EventListItem }) {
 
 export function EventCard({ event }: EventCardProps) {
   const { t, locale } = useTranslation();
-  const qc = useQueryClient();
   const totalVolume = allOutcomes(event).reduce(
     (sum: number, o) => sum + (o.totalVolume ?? 0),
     0,
@@ -157,18 +153,9 @@ export function EventCard({ event }: EventCardProps) {
   const markets = event.markets;
   const isSingleMarket = markets.length <= 1;
 
-  const prefetch = () => {
-    qc.prefetchQuery<EventDetail>({
-      queryKey: ['event', event.slug],
-      queryFn: () => fetch(`${API_URL}/api/v1/events/${event.slug}`).then((r) => r.json()),
-      staleTime: 30_000,
-    });
-  };
-
   return (
     <Link
       href={`/events/${event.slug}`}
-      onMouseEnter={prefetch}
       className="bg-hex-card rounded-xl p-5 border border-hex-border hover:border-hex-blue transition group flex flex-col"
     >
       {isSingleMarket && markets.length === 1 ? (
