@@ -12,6 +12,7 @@ import { useUserTrades } from '@/hooks/useUserTrades';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 import { PriceChart } from '@/components/charts/PriceChart';
+import { useBookBestAsk } from '@/hooks/useBookPrice';
 import { EventTradePanel, type SellRequest } from '@/components/events/EventTradePanel';
 import { EventTabs } from '@/components/events/EventTabs';
 import { EventPositionsSection } from '@/components/events/EventPositionsSection';
@@ -278,7 +279,7 @@ function MarketDetailTabs({
     result.push({
       key: 'chart',
       label: t('orderBook.graph'),
-      content: <PriceChart outcomeId={selectedOutcomeId} />,
+      content: <PriceChart outcomeId={outcomes[0]?.id} />,
     });
     if (hasTrades) {
       result.push({
@@ -340,6 +341,41 @@ function MarketBadges({ outcomes }: { outcomes: Outcome[] }) {
   );
 }
 
+function MarketProbability({ outcomeId }: { outcomeId: string }) {
+  const { t } = useTranslation();
+  const bestAsk = useBookBestAsk(outcomeId);
+  const pct = (bestAsk * 100).toFixed(0);
+  return <span className="text-2xl font-bold text-green-400">{pct}% {t('event.chance')}</span>;
+}
+
+function BottomBuyButton({
+  outcome,
+  onBuy,
+}: {
+  outcome: Outcome;
+  onBuy: () => void;
+}) {
+  const { t, locale } = useTranslation();
+  const bestAsk = useBookBestAsk(outcome.id);
+  const price = (bestAsk * 100).toFixed(0);
+  const lbl = outcome.label.toLowerCase();
+  const isYes = lbl === 'yes' || lbl === 'up';
+
+  return (
+    <button
+      type="button"
+      onClick={onBuy}
+      className={`flex-1 py-3 rounded-xl text-sm font-bold text-white transition ${
+        isYes
+          ? 'bg-green-600 hover:bg-green-700'
+          : 'bg-red-500 hover:bg-red-600'
+      }`}
+    >
+      {t('trading.buy')} {translateDynamic(outcome.label, outcome.labelTranslations, locale)} {price}¢
+    </button>
+  );
+}
+
 export default function MarketDetailPage() {
   const { slug, marketId } = useRouteParams();
   const { data: event, isLoading } = useEvent(slug);
@@ -382,7 +418,6 @@ export default function MarketDetailPage() {
   const activeOutcomeId = selectedOutcomeId || marketOutcomes[0]?.id;
   const activeOutcome = marketOutcomes.find((o) => o.id === activeOutcomeId) || marketOutcomes[0];
   const firstOutcome = marketOutcomes[0];
-  const pct = ((firstOutcome?.price ?? 0.5) * 100).toFixed(0);
   const totalVolume = marketOutcomes.reduce((sum, o) => sum + (o.totalVolume ?? 0), 0);
 
   const marketTitle = translateDynamic(market.title, market.titleTranslations, locale);
@@ -438,7 +473,7 @@ export default function MarketDetailPage() {
 
         {/* Probability + volume */}
         <div className="flex items-center gap-3">
-          <span className="text-2xl font-bold text-green-400">{pct}% {t('event.chance')}</span>
+          {firstOutcome && <MarketProbability outcomeId={firstOutcome.id} />}
           <span className="text-sm text-theme-tertiary">{formatVolume(totalVolume)} {t('event.vol')}</span>
         </div>
 
@@ -462,29 +497,16 @@ export default function MarketDetailPage() {
       {!showTradeModal && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-hex-dark border-t border-hex-border px-4 py-3">
           <div className="flex gap-3">
-            {marketOutcomes.map((o) => {
-              const price = ((o.price ?? 0.5) * 100).toFixed(0);
-              const lbl = o.label.toLowerCase();
-              const isYes = lbl === 'yes' || lbl === 'up';
-
-              return (
-                <button
-                  key={o.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedOutcomeId(o.id);
-                    setShowTradeModal(true);
-                  }}
-                  className={`flex-1 py-3 rounded-xl text-sm font-bold text-white transition ${
-                    isYes
-                      ? 'bg-green-600 hover:bg-green-700'
-                      : 'bg-red-500 hover:bg-red-600'
-                  }`}
-                >
-                  {t('trading.buy')} {translateDynamic(o.label, o.labelTranslations, locale)} {price}¢
-                </button>
-              );
-            })}
+            {marketOutcomes.map((o) => (
+              <BottomBuyButton
+                key={o.id}
+                outcome={o}
+                onBuy={() => {
+                  setSelectedOutcomeId(o.id);
+                  setShowTradeModal(true);
+                }}
+              />
+            ))}
           </div>
         </div>
       )}

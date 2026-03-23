@@ -11,6 +11,7 @@ import { MarketList } from '@/components/events/MarketList';
 import { EventTradePanel, type SellRequest } from '@/components/events/EventTradePanel';
 import { EventTabs } from '@/components/events/EventTabs';
 import { PriceChart } from '@/components/charts/PriceChart';
+import { MultiMarketChart } from '@/components/charts/MultiMarketChart';
 import { EventPositionsSection } from '@/components/events/EventPositionsSection';
 import { EventOpenOrdersSection } from '@/components/events/EventOpenOrdersSection';
 import { EventHistorySection } from '@/components/events/EventHistorySection';
@@ -114,10 +115,14 @@ export default function EventPage() {
           {/* Event Header — inside left column */}
           <EventHeader event={event} />
 
-          {/* Price Chart */}
-          {activeOutcomeId && (
+          {/* Price Chart — multi-market: show first 4 markets; single: show first outcome */}
+          {event.markets.length > 0 && (
             <div className="bg-hex-card rounded-xl p-4 border border-hex-border">
-              <PriceChart outcomeId={activeOutcomeId} />
+              {isMultiMarket ? (
+                <MultiMarketChart markets={event.markets.slice(0, 4)} />
+              ) : (
+                <PriceChart outcomeId={event.markets[0].outcomes[0]?.id} />
+              )}
             </div>
           )}
 
