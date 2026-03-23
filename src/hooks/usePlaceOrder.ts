@@ -59,14 +59,16 @@ export function usePlaceOrder() {
         nonce,
       };
 
-      // Sign order: prefer session key (no popup), fall back to wallet
+      // Sign order: prefer session key (no popup), fall back to wallet.
+      // On-chain program accepts both vault owner and registered delegate.
       const messageBytes = buildOrderMessage(unsignedParams);
       let signatureBytes: Uint8Array;
 
       if (canUseSession) {
         signatureBytes = await signWithSession!(messageBytes);
       } else {
-        signatureBytes = await signMessage!(messageBytes);
+        if (!signMessage) throw new Error('No signing method available');
+        signatureBytes = await signMessage(messageBytes);
       }
 
       const signature = bs58.encode(signatureBytes);
