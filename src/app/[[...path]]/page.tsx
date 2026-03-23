@@ -1,14 +1,11 @@
-import { Suspense } from 'react';
-import SpaApp from './SpaApp';
+import dynamic from 'next/dynamic';
+
+const SpaApp = dynamic(() => import('./SpaApp'), { ssr: false });
 
 export async function generateStaticParams() {
   return [{ path: false }, { path: ['_'] }];
 }
 
 export default function Page() {
-  return (
-    <Suspense>
-      <SpaApp />
-    </Suspense>
-  );
+  return <SpaApp />;
 }
