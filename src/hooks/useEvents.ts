@@ -14,8 +14,8 @@ export function useEvents(tagSlug?: string, status?: string) {
       if (!res.ok) throw new Error('Failed to fetch events');
       return res.json();
     },
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -28,7 +28,7 @@ export function useEvent(slug: string) {
       return res.json();
     },
     enabled: !!slug,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }

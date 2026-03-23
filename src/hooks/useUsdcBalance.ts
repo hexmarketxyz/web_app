@@ -28,7 +28,7 @@ export function useUsdcBalance() {
       return res.json();
     },
     enabled: !!publicKeyBase58 && !!credentials,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }
