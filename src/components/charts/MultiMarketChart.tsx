@@ -35,7 +35,7 @@ function getChartColors() {
   };
 }
 
-/** Fetches price data for one outcome and reports back via callback. */
+/** Fetches price snapshots for one outcome and reports data via callback. */
 function MarketLineFetcher({
   outcomeId,
   index,
@@ -50,7 +50,8 @@ function MarketLineFetcher({
   const { data: snapshots } = usePriceHistory(outcomeId, { from, limit: 500 });
 
   useEffect(() => {
-    if (!snapshots) return;
+    if (!snapshots?.length) return;
+
     const points = snapshots
       .filter((s) => s.price != null)
       .map((s) => ({
@@ -58,7 +59,8 @@ function MarketLineFetcher({
         value: Number(s.price),
       }))
       .sort((a, b) => a.time - b.time);
-    onData(index, points);
+
+    if (points.length > 0) onData(index, points);
   }, [snapshots, index, onData]);
 
   return null;

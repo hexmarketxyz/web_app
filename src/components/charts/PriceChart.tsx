@@ -2,12 +2,8 @@
 
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { createChart, type IChartApi, type ISeriesApi, ColorType } from 'lightweight-charts';
-import { useQuery } from '@tanstack/react-query';
 import { usePriceHistory } from '@/hooks/usePriceHistory';
 import { useThemeStore } from '@/stores/themeStore';
-import type { Trade } from '@hexmarket/sdk';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 interface PriceChartProps {
   outcomeId: string;
@@ -49,51 +45,17 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
 
   const { data: snapshots } = usePriceHistory(outcomeId, { from, limit: 500 });
 
-  // Fetch trades for this outcome to supplement chart data
-  const { data: trades } = useQuery<Trade[]>({
-    queryKey: ['outcomeTrades', outcomeId, 500],
-    queryFn: async () => {
-      const res = await fetch(
-        `${API_URL}/api/v1/trades?outcome_id=${outcomeId}&limit=500`,
-      );
-      if (!res.ok) throw new Error('Failed to fetch trades');
-      return res.json();
-    },
-    enabled: !!outcomeId,
-    staleTime: 60_000,
-    refetchInterval: 60_000,
-  });
-
-  // Merge snapshots + trades into chart data, deduplicating by timestamp
   const chartData = useMemo(() => {
-    const pointMap = new Map<number, number>();
+    if (!snapshots?.length) return [];
 
-    // Add snapshot data points
-    if (snapshots?.length) {
-      for (const s of snapshots) {
-        const t = Math.floor(new Date(s.capturedAt).getTime() / 1000);
-        if (s.price != null) pointMap.set(t, Number(s.price));
-      }
-    }
-
-    // Add trade data points (trades provide more granular data)
-    if (trades?.length) {
-      const fromTs = from ? Math.floor(new Date(from).getTime() / 1000) : 0;
-      for (const trade of trades) {
-        const t = Math.floor(new Date(trade.createdAt).getTime() / 1000);
-        if (t >= fromTs) {
-          // If same second exists, trade price takes precedence
-          pointMap.set(t, Number(trade.price));
-        }
-      }
-    }
-
-    if (pointMap.size === 0) return [];
-
-    return Array.from(pointMap.entries())
-      .sort((a, b) => a[0] - b[0])
-      .map(([time, value]) => ({ time: time as any, value }));
-  }, [snapshots, trades, from]);
+    return snapshots
+      .filter((s) => s.price != null)
+      .map((s) => ({
+        time: Math.floor(new Date(s.capturedAt).getTime() / 1000) as any,
+        value: Number(s.price),
+      }))
+      .sort((a, b) => a.time - b.time);
+  }, [snapshots]);
 
   // Create chart
   useEffect(() => {
@@ -135,7 +97,7 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
       lineWidth: 2,
       priceFormat: {
         type: 'custom',
-        formatter: (p: number) => `${(p * 100).toFixed(0)}¢`,
+        formatter: (p: number) => `${(p * 100).toFixed(0)}%`,
       },
     });
 
