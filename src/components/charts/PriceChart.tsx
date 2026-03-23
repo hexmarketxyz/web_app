@@ -76,7 +76,7 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
       },
       rightPriceScale: {
         borderVisible: false,
-        scaleMargins: { top: 0.1, bottom: 0.1 },
+        autoScale: false,
       },
       timeScale: {
         borderVisible: false,
@@ -140,6 +140,12 @@ export function PriceChart({ outcomeId }: PriceChartProps) {
 
     seriesRef.current.setData(chartData);
     chartRef.current?.timeScale().fitContent();
+    // Fix Y-axis to 0%-100%
+    seriesRef.current.applyOptions({
+      autoscaleInfoProvider: () => ({
+        priceRange: { minValue: 0, maxValue: 1 },
+      }),
+    });
   }, [chartData]);
 
   return (

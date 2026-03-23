@@ -116,7 +116,7 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
       },
       rightPriceScale: {
         borderVisible: false,
-        scaleMargins: { top: 0.1, bottom: 0.1 },
+        autoScale: false,
       },
       timeScale: {
         borderVisible: false,
@@ -139,6 +139,9 @@ export function MultiMarketChart({ markets }: MultiMarketChartProps) {
           type: 'custom',
           formatter: (p: number) => `${(p * 100).toFixed(0)}%`,
         },
+        autoscaleInfoProvider: () => ({
+          priceRange: { minValue: 0, maxValue: 1 },
+        }),
       });
       series.push(s);
     }
