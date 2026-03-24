@@ -174,7 +174,7 @@ export function EventTradePanel({
       // Market buy: user specifies amount (USDC), not quantity.
       // Use best ask to estimate qty; IOC fills at available prices up to 0.999.
       // Backend uses `amount` for balance check instead of price × qty.
-      const bestAsk = market?.bestAsks?.[outcome.id] ?? outcome.price ?? 0.5;
+      const bestAsk = market?.bestAsks?.[outcome.id] ?? market?.bestBids?.[outcome.id] ?? outcome.price ?? 0.5;
       const qty = Math.floor(amount / bestAsk);
       if (qty <= 0) return;
       placeOrder.mutate(
@@ -365,7 +365,7 @@ export function EventTradePanel({
           <OutcomeSelectorButton
             key={o.id}
             outcome={o}
-            bestAsk={market?.bestAsks?.[o.id] ?? 0}
+            bestAsk={market?.bestAsks?.[o.id] ?? market?.bestBids?.[o.id] ?? 0}
             isActive={o.id === outcome.id}
             locale={locale}
             onSelect={() => onSelectOutcome(o.id)}

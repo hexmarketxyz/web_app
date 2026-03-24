@@ -125,7 +125,7 @@ function MarketRow({ market, outcomes, selectedId, onSelect, eventSlug, onBuy, o
                 key={o.id}
                 outcome={o}
                 locale={locale}
-                bestAsk={market.bestAsks?.[o.id] ?? 0}
+                bestAsk={market.bestAsks?.[o.id] ?? market.bestBids?.[o.id] ?? 0}
                 isSelected={o.id === selectedId}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -165,7 +165,7 @@ function MarketRow({ market, outcomes, selectedId, onSelect, eventSlug, onBuy, o
               key={o.id}
               outcome={o}
               locale={locale}
-              bestAsk={market.bestAsks?.[o.id] ?? 0}
+              bestAsk={market.bestAsks?.[o.id] ?? market.bestBids?.[o.id] ?? 0}
               onBuy={onBuy}
             />
           ))}

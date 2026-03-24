@@ -500,7 +500,7 @@ export default function MarketDetailPage() {
               <BottomBuyButton
                 key={o.id}
                 outcome={o}
-                bestAsk={market.bestAsks?.[o.id] ?? 0}
+                bestAsk={market.bestAsks?.[o.id] ?? market.bestBids?.[o.id] ?? 0}
                 onBuy={() => {
                   setSelectedOutcomeId(o.id);
                   setShowTradeModal(true);
