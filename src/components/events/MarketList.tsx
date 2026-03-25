@@ -27,7 +27,7 @@ export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug,
 
   return (
     <div className="bg-hex-card rounded-xl border border-hex-border divide-y divide-hex-border">
-      {markets.map((market) => (
+      {markets.filter((m) => m.status === 'active').map((market) => (
         <MarketRow
           key={market.id}
           market={market}
