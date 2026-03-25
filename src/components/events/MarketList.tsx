@@ -8,6 +8,7 @@ import { translateDynamic } from '@/i18n/dynamic';
 import { usePortfolioPositions } from '@/hooks/usePortfolioPositions';
 import { useAllOpenOrders } from '@/hooks/useAllOpenOrders';
 import { MarketDetailPanel } from './MarketDetailPanel';
+import { formatProbability, formatPriceCents } from '@/lib/formatProbability';
 
 import type { Locale } from '@/i18n/config';
 import { imageUrl } from '@/lib/imageUrl';
@@ -68,7 +69,7 @@ function MarketRow({ market, outcomes, selectedId, onSelect, eventSlug, onBuy, o
   const firstOutcome = market.outcomes[0];
 
   // Use API-provided probability
-  const pct = ((market.probability ?? 0) * 100).toFixed(0);
+  const pct = formatProbability(market.probability ?? 0);
 
   // Badges: open orders and positions for this market
   const marketOutcomeIds = new Set(market.outcomes.map((o) => o.id));
@@ -237,7 +238,7 @@ function OutcomeBuyButton({
   onClick: (e: React.MouseEvent) => void;
 }) {
   const { t } = useTranslation();
-  const price = (bestAsk * 100).toFixed(0);
+  const price = formatPriceCents(bestAsk);
   const lbl = outcome.label.toLowerCase();
   const isYes = lbl === 'yes' || lbl === 'up';
   const isNo = lbl === 'no' || lbl === 'down';
@@ -272,7 +273,7 @@ function MobileBuyButton({
   onBuy?: (outcomeId: string) => void;
 }) {
   const { t } = useTranslation();
-  const price = (bestAsk * 100).toFixed(0);
+  const price = formatPriceCents(bestAsk);
   const lbl = outcome.label.toLowerCase();
   const isYes = lbl === 'yes' || lbl === 'up';
   const isNo = lbl === 'no' || lbl === 'down';

@@ -3,6 +3,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 
 import { useRouteParams } from '@/hooks/useRouteParams';
+import { formatProbability, formatPriceCents } from '@/lib/formatProbability';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEvent } from '@/hooks/useEvents';
 import { useMergedOrderBook } from '@/hooks/useMergedOrderBook';
@@ -342,7 +343,7 @@ function MarketBadges({ outcomes }: { outcomes: Outcome[] }) {
 
 function MarketProbability({ probability }: { probability?: number }) {
   const { t } = useTranslation();
-  const pct = ((probability ?? 0) * 100).toFixed(0);
+  const pct = formatProbability(probability ?? 0);
   return <span className="text-2xl font-bold text-green-400">{pct}% {t('event.chance')}</span>;
 }
 
@@ -356,7 +357,7 @@ function BottomBuyButton({
   onBuy: () => void;
 }) {
   const { t, locale } = useTranslation();
-  const price = (bestAsk * 100).toFixed(0);
+  const price = formatPriceCents(bestAsk);
   const lbl = outcome.label.toLowerCase();
   const isYes = lbl === 'yes' || lbl === 'up';
 

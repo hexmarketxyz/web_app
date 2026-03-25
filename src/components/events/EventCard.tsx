@@ -6,6 +6,7 @@ import { translateDynamic } from '@/i18n/dynamic';
 import type { Locale } from '@/i18n/config';
 
 import { imageUrl } from '@/lib/imageUrl';
+import { formatProbability } from '@/lib/formatProbability';
 
 interface EventCardProps {
   event: EventListItem;
@@ -24,7 +25,7 @@ function formatVolume(microVol: number): string {
 }
 
 /** Circular probability gauge (270° arc). */
-function ProbabilityRing({ pct, chanceLabel }: { pct: number; chanceLabel: string }) {
+function ProbabilityRing({ pct, pctLabel, chanceLabel }: { pct: number; pctLabel?: string; chanceLabel: string }) {
   const size = 64;
   const strokeWidth = 4;
   const radius = (size - strokeWidth) / 2;
@@ -64,7 +65,7 @@ function ProbabilityRing({ pct, chanceLabel }: { pct: number; chanceLabel: strin
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-base font-bold font-mono leading-none">
-          {pct}%
+          {pctLabel ?? pct}%
         </span>
         <span className="text-[10px] text-theme-secondary leading-tight">{chanceLabel}</span>
       </div>
@@ -167,7 +168,8 @@ export function EventCard({ event }: EventCardProps) {
               {translateDynamic(event.title, event.titleTranslations, locale)}
             </h3>
             <ProbabilityRing
-              pct={Number(((markets[0].probability ?? 0) * 100).toFixed(0))}
+              pct={Math.round((markets[0].probability ?? 0) * 100)}
+              pctLabel={formatProbability(markets[0].probability ?? 0)}
               chanceLabel={t('event.chance')}
             />
           </div>
@@ -205,7 +207,7 @@ export function EventCard({ event }: EventCardProps) {
 
 /** Multi-market card row using API-provided probability. */
 function MultiMarketRow({ market, locale }: { market: MarketDetail; locale: Locale }) {
-  const pct = ((market.probability ?? 0) * 100).toFixed(0);
+  const pct = formatProbability(market.probability ?? 0);
 
   return (
     <div className="flex items-center gap-3">
