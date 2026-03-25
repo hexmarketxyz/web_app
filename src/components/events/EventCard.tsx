@@ -149,7 +149,7 @@ export function EventCard({ event }: EventCardProps) {
     0,
   );
 
-  const markets = event.markets;
+  const markets = event.markets.filter((m) => m.status === 'active');
   const isSingleMarket = markets.length <= 1;
 
   return (
