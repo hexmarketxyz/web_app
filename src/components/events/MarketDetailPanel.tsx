@@ -21,6 +21,8 @@ interface MarketDetailPanelProps {
   selectedOutcomeId?: string;
   onSelectOutcome: (id: string) => void;
   onSell?: (outcomeId: string, quantity: number) => void;
+  /** If true, hide orderbook tab (market is resolved) */
+  isResolved?: boolean;
 }
 
 interface DisplayLevel {
@@ -44,6 +46,7 @@ export function MarketDetailPanel({
   selectedOutcomeId,
   onSelectOutcome,
   onSell,
+  isResolved,
 }: MarketDetailPanelProps) {
   const queryClient = useQueryClient();
   const { t, locale } = useTranslation();
@@ -63,13 +66,13 @@ export function MarketDetailPanel({
     const tabs: { key: Tab; label: string }[] = [];
     if (hasPositions) tabs.push({ key: 'positions', label: t('portfolio.positions') });
     if (hasOrders) tabs.push({ key: 'orders', label: t('portfolio.openOrders') });
-    tabs.push({ key: 'orderbook', label: t('orderBook.title') });
+    if (!isResolved) tabs.push({ key: 'orderbook', label: t('orderBook.title') });
     tabs.push({ key: 'graph', label: t('orderBook.graph') });
     if (hasTrades) tabs.push({ key: 'history', label: t('portfolio.history') });
     return tabs;
-  }, [hasPositions, hasOrders, hasTrades, t]);
+  }, [hasPositions, hasOrders, hasTrades, isResolved, t]);
 
-  const [tab, setTab] = useState<Tab>('orderbook');
+  const [tab, setTab] = useState<Tab>(isResolved ? 'graph' : 'orderbook');
   const [viewOutcomeId, setViewOutcomeId] = useState(
     () => selectedOutcomeId || outcomes[0]?.id || '',
   );

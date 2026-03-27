@@ -78,7 +78,16 @@ export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug,
           {showResolved && (
             <div className="bg-hex-card rounded-xl border border-hex-border divide-y divide-hex-border mt-2">
               {resolvedMarkets.map((market) => (
-                <ResolvedMarketRow key={market.id} market={market} />
+                <ResolvedMarketRow
+                  key={market.id}
+                  market={market}
+                  outcomes={outcomes}
+                  selectedId={selectedId}
+                  onSelect={onSelect}
+                  isExpanded={expandedMarketId === market.id}
+                  onToggleExpand={() => setExpandedMarketId(expandedMarketId === market.id ? null : market.id)}
+                  onSell={onSell}
+                />
               ))}
             </div>
           )}
@@ -90,7 +99,17 @@ export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug,
 
 /* ─── Resolved Market Row ─────────────────────────────────── */
 
-function ResolvedMarketRow({ market }: { market: MarketDetail }) {
+interface ResolvedMarketRowProps {
+  market: MarketDetail;
+  outcomes: Outcome[];
+  selectedId?: string;
+  onSelect: (outcomeId: string) => void;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onSell?: (outcomeId: string, quantity: number) => void;
+}
+
+function ResolvedMarketRow({ market, outcomes, selectedId, onSelect, isExpanded, onToggleExpand, onSell }: ResolvedMarketRowProps) {
   const { locale } = useTranslation();
   const winningOutcome = market.outcomes.find((o) => o.outcome === 'yes');
   const winLabel = winningOutcome
@@ -99,25 +118,46 @@ function ResolvedMarketRow({ market }: { market: MarketDetail }) {
   const vol = Math.floor(market.outcomes.reduce((s, o) => s + (o.totalVolume ?? 0), 0) / 1_000_000);
 
   return (
-    <div className="px-5 py-4 flex items-center gap-4 opacity-70">
-      {market.iconUrl && (
-        <img src={imageUrl(market.iconUrl)} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+    <div>
+      <div
+        className={`px-5 py-4 flex items-center gap-4 opacity-70 cursor-pointer hover:bg-hex-overlay/[0.02] transition ${
+          isExpanded ? 'bg-hex-blue/5' : ''
+        }`}
+        onClick={() => {
+          onToggleExpand();
+          if (market.outcomes[0]) onSelect(market.outcomes[0].id);
+        }}
+      >
+        {market.iconUrl && (
+          <img src={imageUrl(market.iconUrl)} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="font-medium text-sm truncate">
+            {translateDynamic(market.title, market.titleTranslations, locale)}
+          </div>
+          <div className="text-xs text-theme-tertiary mt-0.5">
+            ${vol.toLocaleString()} Vol.
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-sm font-medium">{winLabel}</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-red-500">
+            <circle cx="12" cy="12" r="10" fill="currentColor" />
+            <path d="M8 8L16 16M16 8L8 16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Expanded detail — no orderbook tab */}
+      {isExpanded && (
+        <MarketDetailPanel
+          outcomes={market.outcomes}
+          selectedOutcomeId={selectedId}
+          onSelectOutcome={onSelect}
+          onSell={onSell}
+          isResolved
+        />
       )}
-      <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm truncate">
-          {translateDynamic(market.title, market.titleTranslations, locale)}
-        </div>
-        <div className="text-xs text-theme-tertiary mt-0.5">
-          ${vol.toLocaleString()} Vol.
-        </div>
-      </div>
-      <div className="flex items-center gap-1.5 flex-shrink-0">
-        <span className="text-sm font-medium">{winLabel}</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-red-500">
-          <circle cx="12" cy="12" r="10" fill="currentColor" />
-          <path d="M8 8L16 16M16 8L8 16" stroke="white" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </div>
     </div>
   );
 }
