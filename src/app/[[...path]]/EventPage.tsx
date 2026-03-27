@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouteParams } from '@/hooks/useRouteParams';
 import { useEvent } from '@/hooks/useEvents';
 import { useUserEvents } from '@/hooks/useUserEvents';
@@ -104,11 +104,11 @@ export default function EventPage() {
   const isMultiMarket = event.markets.length > 1;
 
   // Sorted active markets (reused by chart + MarketList)
-  const sortedMarkets = useMemo(() => {
+  const sortedMarkets = (() => {
     const active = event.markets.filter((m) => m.status === 'active');
     if (event.sortBy === 'sort_order') return active;
     return [...active].sort((a, b) => (b.probability ?? 0) - (a.probability ?? 0));
-  }, [event.markets, event.sortBy]);
+  })();
 
   // Market is closed if status is not active or close time has passed
   const isMarketClosed = event.status !== 'active' ||
