@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouteParams } from '@/hooks/useRouteParams';
 import { useEvent } from '@/hooks/useEvents';
 import { useUserEvents } from '@/hooks/useUserEvents';
@@ -103,6 +103,13 @@ export default function EventPage() {
   // Multi-market if more than one market
   const isMultiMarket = event.markets.length > 1;
 
+  // Sorted active markets (reused by chart + MarketList)
+  const sortedMarkets = useMemo(() => {
+    const active = event.markets.filter((m) => m.status === 'active');
+    if (event.sortBy === 'sort_order') return active;
+    return [...active].sort((a, b) => (b.probability ?? 0) - (a.probability ?? 0));
+  }, [event.markets, event.sortBy]);
+
   // Market is closed if status is not active or close time has passed
   const isMarketClosed = event.status !== 'active' ||
     (event.closeTime ? new Date(event.closeTime) <= new Date() : false);
@@ -119,7 +126,7 @@ export default function EventPage() {
           {event.markets.length > 0 && (
             <div className="bg-hex-card rounded-xl p-4 border border-hex-border">
               {isMultiMarket ? (
-                <MultiMarketChart markets={event.markets.slice(0, 4)} />
+                <MultiMarketChart markets={sortedMarkets.slice(0, 4)} />
               ) : (
                 <PriceChart outcomeId={event.markets[0].outcomes[0]?.id} />
               )}
@@ -133,11 +140,11 @@ export default function EventPage() {
           {isMultiMarket ? (
             <MarketList
               outcomes={outcomes}
-              markets={event.markets}
+              markets={sortedMarkets}
               selectedId={activeOutcomeId}
               onSelect={setSelectedOutcomeId}
               eventSlug={slug}
-              sortBy={event.sortBy}
+              sortBy="sort_order"
               onBuy={(id) => {
                 setSelectedOutcomeId(id);
                 setShowTradeModal(true);
