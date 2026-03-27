@@ -172,11 +172,11 @@ export default function EventPage() {
           {isMultiMarket ? (
             <MarketList
               outcomes={outcomes}
-              markets={sortedMarkets}
+              markets={event.markets}
               selectedId={activeOutcomeId}
               onSelect={setSelectedOutcomeId}
               eventSlug={slug}
-              sortBy="sort_order"
+              sortBy={event.sortBy}
               onBuy={(id) => {
                 setSelectedOutcomeId(id);
                 setShowTradeModal(true);
