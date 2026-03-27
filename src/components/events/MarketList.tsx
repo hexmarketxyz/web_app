@@ -21,14 +21,23 @@ interface MarketListProps {
   eventSlug?: string;
   onBuy?: (outcomeId: string) => void;
   onSell?: (outcomeId: string, quantity: number) => void;
+  /** How to sort: 'probability_desc' (default) or 'sort_order' */
+  sortBy?: string;
 }
 
-export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug, onBuy, onSell }: MarketListProps) {
+export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug, onBuy, onSell, sortBy }: MarketListProps) {
   const [expandedMarketId, setExpandedMarketId] = useState<string | null>(null);
+
+  const sortedMarkets = useMemo(() => {
+    const active = markets.filter((m) => m.status === 'active');
+    if (sortBy === 'sort_order') return active;
+    // Default: probability_desc
+    return [...active].sort((a, b) => (b.probability ?? 0) - (a.probability ?? 0));
+  }, [markets, sortBy]);
 
   return (
     <div className="bg-hex-card rounded-xl border border-hex-border divide-y divide-hex-border">
-      {markets.filter((m) => m.status === 'active').map((market) => (
+      {sortedMarkets.map((market) => (
         <MarketRow
           key={market.id}
           market={market}

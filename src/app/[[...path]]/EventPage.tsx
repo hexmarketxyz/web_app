@@ -137,6 +137,7 @@ export default function EventPage() {
               selectedId={activeOutcomeId}
               onSelect={setSelectedOutcomeId}
               eventSlug={slug}
+              sortBy={event.sortBy}
               onBuy={(id) => {
                 setSelectedOutcomeId(id);
                 setShowTradeModal(true);

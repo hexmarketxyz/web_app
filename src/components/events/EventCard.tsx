@@ -150,7 +150,11 @@ export function EventCard({ event }: EventCardProps) {
     0,
   );
 
-  const markets = event.markets.filter((m) => m.status === 'active');
+  const markets = (() => {
+    const active = event.markets.filter((m) => m.status === 'active');
+    if (event.sortBy === 'sort_order') return active;
+    return [...active].sort((a, b) => (b.probability ?? 0) - (a.probability ?? 0));
+  })();
   const isSingleMarket = markets.length <= 1;
 
   return (
