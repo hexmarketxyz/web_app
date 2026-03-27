@@ -27,30 +27,97 @@ interface MarketListProps {
 
 export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug, onBuy, onSell, sortBy }: MarketListProps) {
   const [expandedMarketId, setExpandedMarketId] = useState<string | null>(null);
+  const [showResolved, setShowResolved] = useState(false);
 
   const sortedMarkets = useMemo(() => {
     const active = markets.filter((m) => m.status === 'active');
     if (sortBy === 'sort_order') return active;
-    // Default: probability_desc
     return [...active].sort((a, b) => (b.probability ?? 0) - (a.probability ?? 0));
   }, [markets, sortBy]);
 
+  const resolvedMarkets = useMemo(() => {
+    return markets.filter((m) => m.status === 'resolved');
+  }, [markets]);
+
   return (
-    <div className="bg-hex-card rounded-xl border border-hex-border divide-y divide-hex-border">
-      {sortedMarkets.map((market) => (
-        <MarketRow
-          key={market.id}
-          market={market}
-          outcomes={outcomes}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          eventSlug={eventSlug}
-          onBuy={onBuy}
-          onSell={onSell}
-          isExpanded={expandedMarketId === market.id}
-          onToggleExpand={() => setExpandedMarketId(expandedMarketId === market.id ? null : market.id)}
-        />
-      ))}
+    <div className="space-y-0">
+      <div className="bg-hex-card rounded-xl border border-hex-border divide-y divide-hex-border">
+        {sortedMarkets.map((market) => (
+          <MarketRow
+            key={market.id}
+            market={market}
+            outcomes={outcomes}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            eventSlug={eventSlug}
+            onBuy={onBuy}
+            onSell={onSell}
+            isExpanded={expandedMarketId === market.id}
+            onToggleExpand={() => setExpandedMarketId(expandedMarketId === market.id ? null : market.id)}
+          />
+        ))}
+      </div>
+
+      {/* Resolved markets toggle */}
+      {resolvedMarkets.length > 0 && (
+        <div className="mt-3">
+          <button
+            onClick={() => setShowResolved(!showResolved)}
+            className="flex items-center gap-1.5 text-sm text-theme-secondary hover:text-theme-primary transition px-1 py-1"
+          >
+            {showResolved ? 'Hide resolved' : 'View resolved'}
+            <svg
+              width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              className={`transition-transform ${showResolved ? 'rotate-180' : ''}`}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {showResolved && (
+            <div className="bg-hex-card rounded-xl border border-hex-border divide-y divide-hex-border mt-2">
+              {resolvedMarkets.map((market) => (
+                <ResolvedMarketRow key={market.id} market={market} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Resolved Market Row ─────────────────────────────────── */
+
+function ResolvedMarketRow({ market }: { market: MarketDetail }) {
+  const { locale } = useTranslation();
+  const winningOutcome = market.outcomes.find((o) => o.outcome === 'yes');
+  const winLabel = winningOutcome
+    ? translateDynamic(winningOutcome.label, winningOutcome.labelTranslations, locale)
+    : '—';
+  const vol = Math.floor(market.outcomes.reduce((s, o) => s + (o.totalVolume ?? 0), 0) / 1_000_000);
+
+  return (
+    <div className="px-5 py-4 flex items-center gap-4 opacity-70">
+      {market.iconUrl && (
+        <img src={imageUrl(market.iconUrl)} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+      )}
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-sm truncate">
+          {translateDynamic(market.title, market.titleTranslations, locale)}
+        </div>
+        <div className="text-xs text-theme-tertiary mt-0.5">
+          ${vol.toLocaleString()} Vol.
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        <span className="text-sm font-medium">{winLabel}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-red-500">
+          <circle cx="12" cy="12" r="10" fill="currentColor" />
+          <path d="M8 8L16 16M16 8L8 16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      </div>
     </div>
   );
 }

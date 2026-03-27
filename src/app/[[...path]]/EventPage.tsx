@@ -19,7 +19,33 @@ import { CommentsTab } from '@/components/events/tabs/CommentsTab';
 import { TopHoldersTab } from '@/components/events/tabs/TopHoldersTab';
 import { PositionsTab } from '@/components/events/tabs/PositionsTab';
 import { ActivityTab } from '@/components/events/tabs/ActivityTab';
-import type { EventDetail, Outcome } from '@hexmarket/sdk';
+import type { EventDetail, Outcome, MarketDetail } from '@hexmarket/sdk';
+import { translateDynamic } from '@/i18n/dynamic';
+
+function ResolvedMarketPanel({ market }: { market: MarketDetail }) {
+  const { locale } = useTranslation();
+  const winningOutcome = market.outcomes.find((o) => o.outcome === 'yes');
+  const winLabel = winningOutcome
+    ? translateDynamic(winningOutcome.label, winningOutcome.labelTranslations, locale)
+    : '—';
+  const marketTitle = translateDynamic(market.title, market.titleTranslations, locale);
+
+  return (
+    <div className="bg-hex-card rounded-xl border border-hex-border p-8 flex flex-col items-center text-center">
+      <div className="w-16 h-16 rounded-full bg-hex-blue flex items-center justify-center mb-4">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+      <div className="text-xl font-semibold text-hex-blue mb-1">
+        Outcome: {winLabel}
+      </div>
+      <div className="text-sm text-theme-tertiary">
+        {marketTitle}
+      </div>
+    </div>
+  );
+}
 
 function formatVolume(microVol: number): string {
   const vol = microVol / 1_000_000;
@@ -114,6 +140,12 @@ export default function EventPage() {
   const isMarketClosed = event.status !== 'active' ||
     (event.closeTime ? new Date(event.closeTime) <= new Date() : false);
 
+  // Check if the currently selected outcome's market is resolved
+  const activeMarket = activeOutcome
+    ? event.markets.find((m) => m.outcomes.some((o) => o.id === activeOutcome.id))
+    : undefined;
+  const isActiveMarketResolved = activeMarket?.status === 'resolved';
+
   return (
     <>
       <div className="flex flex-col lg:flex-row gap-6">
@@ -185,7 +217,9 @@ export default function EventPage() {
         {!isMarketClosed && (
           <div className="hidden lg:block w-[340px] flex-shrink-0">
             <div className="lg:sticky lg:top-[7.5rem]">
-              {activeOutcome ? (
+              {isActiveMarketResolved && activeMarket ? (
+                <ResolvedMarketPanel market={activeMarket} />
+              ) : activeOutcome ? (
                 <EventTradePanel
                   outcome={activeOutcome}
                   outcomes={outcomes}
