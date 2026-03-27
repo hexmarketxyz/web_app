@@ -130,6 +130,9 @@ export const ko: TranslationKeys = {
     chance: '확률',
     vol: '거래량',
     closes: '마감',
+    viewResolved: '확정된 항목 보기',
+    hideResolved: '확정된 항목 숨기기',
+    outcome: '결과',
   },
   tabs: {
     comments: '댓글',

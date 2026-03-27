@@ -128,6 +128,9 @@ export const en = {
     chance: 'chance',
     vol: 'Vol.',
     closes: 'Closes',
+    viewResolved: 'View resolved',
+    hideResolved: 'Hide resolved',
+    outcome: 'Outcome',
   },
   tabs: {
     comments: 'Comments',

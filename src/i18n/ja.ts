@@ -130,6 +130,9 @@ export const ja: TranslationKeys = {
     chance: '確率',
     vol: '出来高',
     closes: '締切',
+    viewResolved: '確定済みを表示',
+    hideResolved: '確定済みを非表示',
+    outcome: '結果',
   },
   tabs: {
     comments: 'コメント',

@@ -26,6 +26,7 @@ interface MarketListProps {
 }
 
 export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug, onBuy, onSell, sortBy }: MarketListProps) {
+  const { t } = useTranslation();
   const [expandedMarketId, setExpandedMarketId] = useState<string | null>(null);
   const [showResolved, setShowResolved] = useState(false);
 
@@ -65,7 +66,7 @@ export function MarketList({ outcomes, markets, selectedId, onSelect, eventSlug,
             onClick={() => setShowResolved(!showResolved)}
             className="flex items-center gap-1.5 text-sm text-theme-secondary hover:text-theme-primary transition px-1 py-1"
           >
-            {showResolved ? 'Hide resolved' : 'View resolved'}
+            {showResolved ? t('event.hideResolved') : t('event.viewResolved')}
             <svg
               width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -110,7 +111,7 @@ interface ResolvedMarketRowProps {
 }
 
 function ResolvedMarketRow({ market, outcomes, selectedId, onSelect, isExpanded, onToggleExpand, onSell }: ResolvedMarketRowProps) {
-  const { locale } = useTranslation();
+  const { t, locale } = useTranslation();
   const winningOutcome = market.outcomes.find((o) => o.outcome === 'yes');
   const winLabel = winningOutcome
     ? translateDynamic(winningOutcome.label, winningOutcome.labelTranslations, locale)
@@ -136,7 +137,7 @@ function ResolvedMarketRow({ market, outcomes, selectedId, onSelect, isExpanded,
             {translateDynamic(market.title, market.titleTranslations, locale)}
           </div>
           <div className="text-xs text-theme-tertiary mt-0.5">
-            ${vol.toLocaleString()} Vol.
+            ${vol.toLocaleString()} {t('event.vol')}
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">

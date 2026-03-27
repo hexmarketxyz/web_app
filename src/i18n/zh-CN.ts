@@ -130,6 +130,9 @@ export const zhCN: TranslationKeys = {
     chance: '概率',
     vol: '成交量',
     closes: '截止日期',
+    viewResolved: '查看已结算',
+    hideResolved: '隐藏已结算',
+    outcome: '结果',
   },
   tabs: {
     comments: '评论',

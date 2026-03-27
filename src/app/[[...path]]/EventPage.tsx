@@ -23,7 +23,7 @@ import type { EventDetail, Outcome, MarketDetail } from '@hexmarket/sdk';
 import { translateDynamic } from '@/i18n/dynamic';
 
 function ResolvedMarketPanel({ market }: { market: MarketDetail }) {
-  const { locale } = useTranslation();
+  const { t, locale } = useTranslation();
   const winningOutcome = market.outcomes.find((o) => o.outcome === 'yes');
   const winLabel = winningOutcome
     ? translateDynamic(winningOutcome.label, winningOutcome.labelTranslations, locale)
@@ -38,7 +38,7 @@ function ResolvedMarketPanel({ market }: { market: MarketDetail }) {
         </svg>
       </div>
       <div className="text-xl font-semibold text-hex-blue mb-1">
-        Outcome: {winLabel}
+        {t('event.outcome')}: {winLabel}
       </div>
       <div className="text-sm text-theme-tertiary">
         {marketTitle}

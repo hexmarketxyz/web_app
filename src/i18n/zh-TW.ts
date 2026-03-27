@@ -130,6 +130,9 @@ export const zhTW: TranslationKeys = {
     chance: '機率',
     vol: '成交量',
     closes: '截止日期',
+    viewResolved: '查看已結算',
+    hideResolved: '隱藏已結算',
+    outcome: '結果',
   },
   tabs: {
     comments: '留言',

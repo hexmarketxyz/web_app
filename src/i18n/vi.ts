@@ -130,6 +130,9 @@ export const vi: TranslationKeys = {
     chance: 'xác suất',
     vol: 'KL',
     closes: 'Kết thúc',
+    viewResolved: 'Xem đã kết thúc',
+    hideResolved: 'Ẩn đã kết thúc',
+    outcome: 'Kết quả',
   },
   tabs: {
     comments: 'Bình luận',
