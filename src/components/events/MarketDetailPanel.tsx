@@ -65,7 +65,7 @@ export function MarketDetailPanel({
   const availableTabs = useMemo(() => {
     const tabs: { key: Tab; label: string }[] = [];
     if (hasPositions) tabs.push({ key: 'positions', label: t('portfolio.positions') });
-    if (hasOrders) tabs.push({ key: 'orders', label: t('portfolio.openOrders') });
+    if (hasOrders && !isResolved) tabs.push({ key: 'orders', label: t('portfolio.openOrders') });
     if (!isResolved) tabs.push({ key: 'orderbook', label: t('orderBook.title') });
     tabs.push({ key: 'graph', label: t('orderBook.graph') });
     if (hasTrades) tabs.push({ key: 'history', label: t('portfolio.history') });
