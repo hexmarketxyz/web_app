@@ -37,7 +37,7 @@ export function useSpaNavigate() {
 }
 
 /** SPA routes — link clicks to these paths are intercepted for client-side navigation */
-const SPA_PREFIXES = ['/events', '/category', '/'];
+const SPA_PREFIXES = ['/events', '/category', '/portfolio', '/'];
 
 function isSpaRoute(href: string): boolean {
   if (href === '/') return true;
