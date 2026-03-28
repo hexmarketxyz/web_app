@@ -5,10 +5,16 @@ import HomePage from './HomePage';
 import CategoryPage from './CategoryPage';
 import EventPage from './EventPage';
 import MarketDetailPage from './MarketDetailPage';
+import PortfolioPage from './PortfolioPage';
 
 function SpaRouter() {
   const pathname = useSpaPathname();
   const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+
+  // /portfolio
+  if (parts[0] === 'portfolio') {
+    return <PortfolioPage />;
+  }
 
   // /events/:slug/market/:marketId
   if (parts[0] === 'events' && parts[2] === 'market' && parts[3]) {
