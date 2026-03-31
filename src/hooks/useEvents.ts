@@ -2,7 +2,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { EventListItem, EventDetail } from '@hexmarket/sdk';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 18;
 
 export function useEvents(tagSlug?: string, status?: string) {
   return useQuery<EventListItem[]>({

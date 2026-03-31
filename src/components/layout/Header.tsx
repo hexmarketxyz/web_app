@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useSpaPathname } from '@/hooks/useSpaNavigation';
 import { ConnectButton } from '@/components/auth/ConnectButton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
@@ -11,7 +11,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 
 export function Header() {
-  const pathname = usePathname();
+  const pathname = useSpaPathname();
   const { data: tags } = useTags();
   const { t, locale } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
