@@ -9,6 +9,8 @@ export const zhCN: TranslationKeys = {
     loadingOrders: '加载订单中...',
     loadingOrderHistory: '加载历史订单中...',
     noEventsFound: '未找到事件。',
+    loadingMore: '加载更多...',
+    noMoreEvents: '没有更多事件了。',
     noEventsInCategory: '该分类下没有事件。',
     categoryNotFound: '未找到分类',
     eventNotFound: '未找到事件',

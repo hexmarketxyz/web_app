@@ -9,6 +9,8 @@ export const ko: TranslationKeys = {
     loadingOrders: '주문 로딩 중...',
     loadingOrderHistory: '주문 내역 로딩 중...',
     noEventsFound: '이벤트를 찾을 수 없습니다.',
+    loadingMore: '더 불러오는 중...',
+    noMoreEvents: '더 이상 이벤트가 없습니다.',
     noEventsInCategory: '이 카테고리에 이벤트가 없습니다.',
     categoryNotFound: '카테고리를 찾을 수 없습니다',
     eventNotFound: '이벤트를 찾을 수 없습니다',

@@ -9,6 +9,8 @@ export const vi: TranslationKeys = {
     loadingOrders: 'Đang tải lệnh...',
     loadingOrderHistory: 'Đang tải lịch sử lệnh...',
     noEventsFound: 'Không tìm thấy sự kiện nào.',
+    loadingMore: 'Đang tải thêm...',
+    noMoreEvents: 'Không còn sự kiện nào.',
     noEventsInCategory: 'Không tìm thấy sự kiện nào trong danh mục này.',
     categoryNotFound: 'Không tìm thấy danh mục',
     eventNotFound: 'Không tìm thấy sự kiện',

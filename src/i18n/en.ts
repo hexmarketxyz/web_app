@@ -7,6 +7,8 @@ export const en = {
     loadingOrders: 'Loading orders...',
     loadingOrderHistory: 'Loading order history...',
     noEventsFound: 'No events found.',
+    loadingMore: 'Loading more...',
+    noMoreEvents: 'No more events to show.',
     noEventsInCategory: 'No events found in this category.',
     categoryNotFound: 'Category not found',
     eventNotFound: 'Event not found',

@@ -9,6 +9,8 @@ export const ja: TranslationKeys = {
     loadingOrders: '注文を読み込み中...',
     loadingOrderHistory: '注文履歴を読み込み中...',
     noEventsFound: 'イベントが見つかりません。',
+    loadingMore: 'さらに読み込み中...',
+    noMoreEvents: 'これ以上のイベントはありません。',
     noEventsInCategory: 'このカテゴリにイベントがありません。',
     categoryNotFound: 'カテゴリが見つかりません',
     eventNotFound: 'イベントが見つかりません',

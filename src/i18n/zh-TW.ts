@@ -9,6 +9,8 @@ export const zhTW: TranslationKeys = {
     loadingOrders: '載入訂單中...',
     loadingOrderHistory: '載入歷史訂單中...',
     noEventsFound: '找不到任何事件。',
+    loadingMore: '載入更多...',
+    noMoreEvents: '沒有更多事件了。',
     noEventsInCategory: '此分類中找不到任何事件。',
     categoryNotFound: '找不到該分類',
     eventNotFound: '找不到該事件',
