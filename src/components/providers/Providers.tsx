@@ -13,6 +13,7 @@ import { PrivyWalletProvider } from './PrivyWalletProvider';
 import { OkxWalletProvider } from './OkxWalletProvider';
 import { BinanceWalletProvider } from './BinanceWalletProvider';
 import { SessionKeyProvider } from './SessionKeyProvider';
+import { SpaNavigationProvider } from '@/hooks/useSpaNavigation';
 import { isOkxWalletBrowser } from '@/lib/okxDetect';
 import { isBinanceWalletBrowser } from '@/lib/binanceDetect';
 
@@ -82,21 +83,23 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <WebSocketProvider>
-        <WalletStack>
-          <SessionKeyProvider>
-            <AuthTokenProvider>
-              <ApiCredentialsProvider>
-                <ThemeProvider>
-                  <ToastProvider>
-                    {children}
-                  </ToastProvider>
-                </ThemeProvider>
-              </ApiCredentialsProvider>
-            </AuthTokenProvider>
-          </SessionKeyProvider>
-        </WalletStack>
-      </WebSocketProvider>
+      <SpaNavigationProvider>
+        <WebSocketProvider>
+          <WalletStack>
+            <SessionKeyProvider>
+              <AuthTokenProvider>
+                <ApiCredentialsProvider>
+                  <ThemeProvider>
+                    <ToastProvider>
+                      {children}
+                    </ToastProvider>
+                  </ThemeProvider>
+                </ApiCredentialsProvider>
+              </AuthTokenProvider>
+            </SessionKeyProvider>
+          </WalletStack>
+        </WebSocketProvider>
+      </SpaNavigationProvider>
     </QueryClientProvider>
   );
 }

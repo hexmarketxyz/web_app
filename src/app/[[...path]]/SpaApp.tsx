@@ -1,6 +1,6 @@
 'use client';
 
-import { SpaNavigationProvider, useSpaPathname } from '@/hooks/useSpaNavigation';
+import { useSpaPathname } from '@/hooks/useSpaNavigation';
 import HomePage from './HomePage';
 import CategoryPage from './CategoryPage';
 import EventPage from './EventPage';
@@ -36,9 +36,5 @@ function SpaRouter() {
 }
 
 export default function SpaApp() {
-  return (
-    <SpaNavigationProvider>
-      <SpaRouter />
-    </SpaNavigationProvider>
-  );
+  return <SpaRouter />;
 }
