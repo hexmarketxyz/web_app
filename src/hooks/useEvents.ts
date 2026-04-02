@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import type { EventListItem, EventDetail } from '@hexmarket/sdk';
+import type { EventListItem, EventDetail, SeriesSibling } from '@hexmarket/sdk';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 const PAGE_SIZE = 18;
@@ -53,6 +53,20 @@ export function useEvent(slug: string) {
     },
     enabled: !!slug,
     staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useSeriesSiblings(eventId?: string) {
+  return useQuery<SeriesSibling[]>({
+    queryKey: ['series-siblings', eventId],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/api/v1/events/${eventId}/series-siblings`);
+      if (!res.ok) throw new Error('Failed to fetch series siblings');
+      return res.json();
+    },
+    enabled: !!eventId,
+    staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
 }
