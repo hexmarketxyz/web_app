@@ -57,6 +57,31 @@ export function useEvent(slug: string) {
   });
 }
 
+export interface PriceTick {
+  t: number; // unix seconds
+  p: number; // price
+}
+
+export function usePriceTicks(symbol?: string, from?: number, to?: number) {
+  return useQuery<PriceTick[]>({
+    queryKey: ['price-ticks', symbol, from, to],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.set('symbol', symbol!);
+      if (from) params.set('from', String(from));
+      if (to) params.set('to', String(to));
+      params.set('limit', '3600');
+      const res = await fetch(`${API_URL}/api/v1/price-ticks?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch price ticks');
+      return res.json();
+    },
+    enabled: !!symbol,
+    staleTime: 10_000,
+    refetchInterval: 10_000,
+    refetchOnWindowFocus: false,
+  });
+}
+
 export function useSeriesSiblings(eventId?: string) {
   return useQuery<SeriesSibling[]>({
     queryKey: ['series-siblings', eventId],

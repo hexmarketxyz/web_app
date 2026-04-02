@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouteParams } from '@/hooks/useRouteParams';
-import { useEvent, useSeriesSiblings } from '@/hooks/useEvents';
+import { useEvent, useSeriesSiblings, usePriceTicks } from '@/hooks/useEvents';
 import { useTranslation } from '@/hooks/useTranslation';
 import { translateDynamic } from '@/i18n/dynamic';
 import { useSpaNavigate } from '@/hooks/useSpaNavigation';
 import { PriceChart } from '@/components/charts/PriceChart';
+import { AssetPriceChart } from '@/components/charts/AssetPriceChart';
 import { EventTradePanel, type SellRequest } from '@/components/events/EventTradePanel';
 import { EventPositionsSection } from '@/components/events/EventPositionsSection';
 import { OrderBookPanel } from '@/components/events/OrderBookPanel';
@@ -59,6 +60,16 @@ export default function PriceUpDownEventPage() {
   const firstMarket = event.markets[0];
   const upOutcome = firstMarket?.outcomes.find((o) => o.label.toLowerCase() === 'up');
   const probability = firstMarket?.probability;
+
+  // Parse metadata
+  const meta = event.metadata as Record<string, unknown> | undefined;
+  const priceSymbol = (meta?.symbol as string) ?? undefined;
+  const strikePrice = typeof meta?.strike_price === 'number' ? meta.strike_price : undefined;
+  const closePrice = typeof meta?.close_price === 'number' ? meta.close_price : undefined;
+
+  // Fetch price ticks for chart
+  const { data: priceTicks } = usePriceTicks(priceSymbol);
+  const currentPrice = priceTicks && priceTicks.length > 0 ? priceTicks[priceTicks.length - 1].p : closePrice;
 
   const isMarketClosed = event.status !== 'active' ||
     (event.closeTime ? new Date(event.closeTime) <= new Date() : false);
@@ -119,15 +130,21 @@ export default function PriceUpDownEventPage() {
                 </div>
               </div>
 
-              {/* Probability + countdown */}
-              <div className="flex items-center gap-4 flex-shrink-0">
-                {probability != null && (
+              {/* Price info + countdown */}
+              <div className="flex items-center gap-5 flex-shrink-0">
+                {strikePrice != null && (
                   <div className="text-center">
-                    <div className="text-xs text-theme-tertiary uppercase">
-                      {upOutcome ? translateDynamic(upOutcome.label, upOutcome.labelTranslations, locale) : 'Up'}
+                    <div className="text-[10px] text-theme-tertiary uppercase">Price To Beat</div>
+                    <div className="text-sm font-bold font-mono">${strikePrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                  </div>
+                )}
+                {currentPrice != null && (
+                  <div className="text-center">
+                    <div className="text-[10px] uppercase" style={{ color: strikePrice && currentPrice >= strikePrice ? '#22c55e' : '#ef4444' }}>
+                      Current Price
                     </div>
-                    <div className="text-2xl font-bold text-green-400">
-                      {formatProbability(probability)}%
+                    <div className="text-sm font-bold font-mono" style={{ color: strikePrice && currentPrice >= strikePrice ? '#22c55e' : '#ef4444' }}>
+                      ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </div>
                   </div>
                 )}
@@ -135,7 +152,7 @@ export default function PriceUpDownEventPage() {
                   <div className="text-center">
                     <div className="text-3xl font-bold font-mono text-red-400">{countdown}</div>
                     <div className="text-[10px] text-theme-tertiary uppercase tracking-wide">
-                      {countdown.startsWith('00:') ? t('event.closes') : 'MINS'}
+                      {countdown.startsWith('00:') ? 'SECS' : 'MINS'}
                     </div>
                   </div>
                 )}
@@ -149,10 +166,11 @@ export default function PriceUpDownEventPage() {
               {chartMode === 'probability' && outcomes[0] ? (
                 <PriceChart outcomeId={outcomes[0].id} />
               ) : (
-                <div className="h-64 flex items-center justify-center text-theme-tertiary text-sm">
-                  {/* Price chart placeholder — needs external price feed */}
-                  <PriceChart outcomeId={outcomes[0]?.id} />
-                </div>
+                <AssetPriceChart
+                  ticks={priceTicks ?? []}
+                  strikePrice={strikePrice}
+                  height={260}
+                />
               )}
 
               {/* Chart mode toggle */}
